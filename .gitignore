@@ -1,0 +1,16 @@
+# Virtualenvs / env files
+venv/
+.venv/
+env/
+.env
+
+__pycache__/
+*.pyc
+
+*_out.png
+*_out.jpg
+*_out.jpeg
+*_grown.png
+*_grown.jpg
+*_output.png
+*_discarded.png
