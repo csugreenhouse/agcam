@@ -94,7 +94,7 @@ def plot_blobs(image, out_path, blobs):
 
     add_green_blobs(ax,blobs,color)#draws green blobs around leaves
         
-    ax.legend(loc='upper center', bbox_to_anchor=(0.5, -0.05),ncol=2)
+    #ax.legend(loc='upper center', bbox_to_anchor=(0.5, -0.05),ncol=2)
 
     plt.savefig(str(out_path), bbox_inches="tight")
     plt.close(fig)
