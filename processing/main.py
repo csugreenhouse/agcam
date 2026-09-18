@@ -5,23 +5,23 @@ import sys
 import cv2
 import numpy as np
 
+import importlib
+
+sys.path.append("/mnt/db/agcam")
+
+
+processor = importlib.import_module("processing.processor")
+
 def main():
    while(True):
        print("Agcam Processing Activated")
 
-
-        image_paths = []
-
-        #here put the processing code for the images; find them in the folder, then run open cv masking, measuring, save copies with the visuals, then saving everything to the database.
-         
-
-               print(f"Agcam Processing Successful for files: {image_paths}")
-
-
-           except Exception as e:
-               print(e)
-               print(f"\033[91mError\033[0m")
-          
+       try:
+           processor.make_blobs_for_all_imgs_in_folder("/mnt/image/image-inbox") #this is the current runtime script that will process and copy photos for now.
+       except Exception as e:
+           print(e)
+           print(f"\033[91mError\033[0m")
+       
        print("Standby")
 
        # wait 1 day to process new images again.
