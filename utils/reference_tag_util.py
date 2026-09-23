@@ -4,7 +4,7 @@ import warnings
 import sys
 sys.path.append('/mnt/db/agcam')
 import apriltag
-
+'''
 def scan_raw_tags(image):
     gray = cv2.cvtColor(image,cv2.COLOR_BGR2GRAY)
     options = apriltag.DetectorOptions(families="tag25h9")
@@ -48,3 +48,4 @@ def sort_corners(corners):
     bottom_left = corners[np.argmax(diff)]
 
     return [top_left, top_right, bottom_right, bottom_left]
+'''
