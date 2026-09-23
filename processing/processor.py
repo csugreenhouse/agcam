@@ -13,13 +13,14 @@ sys.path.append("/mnt/db/agcam")
 
 gu = importlib.import_module("utils.graph_util")
 pf = importlib.import_module("utils.plant_finder_util")
+db = importlib.import_module("database.database")
 
-def process_and_make_copies_blob_visuals(file_path):
+def process_and_make_copies_blob_visuals(file_path,cam_number):
     #section 1: Prepare directories for processed and archived images
-    processed_folder_path = f"/mnt/image/images-processed/"
+    processed_folder_path = f"/mnt/image/images-processed/{cam_number}/"
     Path(processed_folder_path).mkdir(parents=True, exist_ok=True)
 
-    archived_folder_path = f"/mnt/image/image-archive/"
+    archived_folder_path = f"/mnt/image/image-archive/{cam_number}/"
     Path(archived_folder_path).mkdir(parents=True, exist_ok=True)
 
     image_name = file_path.rsplit("/",1)[-1]
@@ -49,7 +50,15 @@ def process_and_make_copies_blob_visuals(file_path):
     print("\033[32m" + f"Processed and saved blobs to {processed_file_path}" + "\033[0m")
 
 def make_blobs_for_all_imgs_in_folder(folder_path):
-    for file_name in os.listdir(folder_path):
-        if file_name.endswith(".jpg") or file_name.endswith(".png"):
-            file_path = os.path.join(folder_path, file_name)
-            process_and_make_copies_blob_visuals(file_path)
+    conn = db.open_connection_to_database()
+    for folder in os.listdir(folder_path):
+        folder_full_path = os.path.join(folder_path, folder)
+        if os.path.isdir(folder_full_path):
+            for file_name in os.listdir(folder_full_path):
+                if file_name.endswith(".jpg") or file_name.endswith(".png"):
+                    file_path = os.path.join(folder_full_path, file_name)
+                    cam_name=str(folder)
+                    cam_number = int(cam_name[0])
+                    process_and_make_copies_blob_visuals(file_path, cam_name)
+                    db.append_photo_to_imgIndex(conn, cam_number, file_path)
+    db.close_connection_to_database(conn)

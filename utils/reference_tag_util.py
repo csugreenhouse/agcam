@@ -2,7 +2,7 @@ import cv2
 import numpy as np
 import warnings
 import sys
-sys.path.append('/srv/samba/Server')
+sys.path.append('/mnt/db/agcam')
 import apriltag
 
 def scan_raw_tags(image):
