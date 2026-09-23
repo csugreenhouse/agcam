@@ -11,7 +11,7 @@ color_pallet = ['cyan', 'yellow', 'magenta', 'orange', 'pink', 'lime', 'aqua']
 
 # PLOT THE REFERENCE TAG
 
-def plot_reference_tag(image,out_path, reference_tag):
+'''def plot_reference_tag(image,out_path, reference_tag):
     graph_rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
     W,H = graph_rgb.shape[1], graph_rgb.shape[0]
     fig, ax = plt.subplots()
@@ -28,11 +28,11 @@ def plot_reference_tag(image,out_path, reference_tag):
 
     ax.legend(loc='upper center', bbox_to_anchor=(0.5, -0.05),ncol=2)
     plt.savefig(str(out_path), bbox_inches="tight")
-    plt.close(fig)
+    plt.close(fig)'''
     
 #PLOT THE estimate_heights_reference_tags response from height_request
     
-def plot_height_request_response(image, out_path, response):
+'''def plot_height_request_response(image, out_path, response):
     graph_rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
     W,H = graph_rgb.shape[1], graph_rgb.shape[0]
     fig, ax = plt.subplots()
@@ -56,8 +56,8 @@ def plot_height_request_response(image, out_path, response):
     ax.legend(loc='upper center', bbox_to_anchor=(0.5, -0.05),ncol=1)
     plt.savefig(str(out_path), bbox_inches="tight")
     plt.close(fig)
-    
-
+    '''
+'''
 def plot_widths_request_response(image, out_path, response):
     graph_rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
     W,H = graph_rgb.shape[1], graph_rgb.shape[0]
@@ -81,6 +81,7 @@ def plot_widths_request_response(image, out_path, response):
 
     plt.savefig(str(out_path), bbox_inches="tight")
     plt.close(fig)
+    '''
 
 #plot blobs alone
 def plot_blobs(image, out_path, blobs):
@@ -98,6 +99,8 @@ def plot_blobs(image, out_path, blobs):
 
     plt.savefig(str(out_path), bbox_inches="tight")
     plt.close(fig)
+
+    '''
     
 def plot_calculated_displacements_graph_info(image, out_path, reference_tag):
     graph_rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
@@ -111,6 +114,9 @@ def plot_calculated_displacements_graph_info(image, out_path, reference_tag):
     ax.legend(loc='upper center', bbox_to_anchor=(0.5, -0.05),ncol=2)
     plt.savefig(str(out_path), bbox_inches="tight")
     plt.close(fig)
+    '''
+
+    '''
 
 def add_tag_displacement_relative_to_camera(ax, W, H, reference_tag, color=None):
     if color is None:
@@ -135,6 +141,8 @@ def add_tag_displacement_relative_to_camera(ax, W, H, reference_tag, color=None)
     ax.plot([], [], color=color[1], label='Horizontal Displacement (x)\n %.6f cm' % (displacement_x*100))
     ax.plot([], [], color=color[2], label='Vertical Displacement (y)\n %.6f cm' % (displacement_y*100))
     ax.plot([], [], color='black', label='Distance to QR Code (d)\n %.6f cm' % (displacement_d*100))
+    '''
+    '''
 
 def add_camera_view_frustum(ax, heighest_green_pixel,camera_parameters, reference_tag, color='yellow'):
     width = camera_parameters["width"]
@@ -155,25 +163,8 @@ def add_camera_view_frustum(ax, heighest_green_pixel,camera_parameters, referenc
 
     ax.plot([heighest_green_pixel[0], x_point], [heighest_green_pixel[1], y_point], color=color, linewidth=1)
     ax.plot([], [], color=color, label='Camera View to Heighest Plant Pixel \n (May indicate occlusion or steep angle)')
-    
-def add_plant_bounds(ax,W,H,plant_bounds,color):
-    x_lower = plant_bounds[0]*W
-    x_upper = plant_bounds[1]*W
-    y_lower = plant_bounds[2]*H
-    y_upper = plant_bounds[3]*H
-    
-    width = x_upper-x_lower
-    height = y_upper-y_lower
-    
-    rect = patches.Rectangle(
-        (x_lower, y_lower),
-        width,
-        height,
-        alpha=0.2,
-        facecolor=color
-    )
-    ax.add_patch(rect)
-    
+    '''
+    '''
 
 def add_tag(ax, tag, color='cyan', center_size=20):
     try:
@@ -194,7 +185,7 @@ def add_tag(ax, tag, color='cyan', center_size=20):
     ax.text(br[0], br[1], "BR", fontsize=8, ha='center', va='center')
     ax.text(bl[0], bl[1], "BL", fontsize=8, ha='center', va='center')
     ax.plot([], [], color=color, label=f'Tag ID: {tag["data"]}')
-    
+    '''
 
 def add_green_blobs(ax, plant_blob_list, color='lime'):
     for blob in plant_blob_list:
