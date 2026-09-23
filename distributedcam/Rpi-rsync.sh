@@ -5,8 +5,11 @@ set -e
 
 # Define source and destination paths
 # Note: A trailing slash on the source directory syncs its contents, not the folder itself.
+CAM_NUMBER="0CAM/"
+
 SOURCE_DIR="/home/agcam/images/"
-DEST_DIR="agcam@192.168.0.55:/home/agcam/image-inbox/"
+DIR="agcam@192.168.0.55:/home/agcam/image-inbox/"
+DEST_DIR="${DIR}${CAM_NUMBER}"
 
 # Define log file path
 LOG_FILE="/home/agcam/log/rsync_move.log"
