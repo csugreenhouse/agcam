@@ -93,12 +93,14 @@ def plot_blobs(image, out_path, blobs):
 
     color = color_pallet[1%len(color_pallet)]#choose color pallett
 
-    add_green_blobs(ax,blobs,color)#draws green blobs around leaves
-        
-    #ax.legend(loc='upper center', bbox_to_anchor=(0.5, -0.05),ncol=2)
-
-    plt.savefig(str(out_path), bbox_inches="tight")
-    plt.close(fig)
+    try:
+        add_green_blobs(ax,blobs,color)#draws green blobs around leaves
+        plt.savefig(str(out_path), bbox_inches="tight")
+        plt.close(fig)
+    except Exception as e:
+        print(f"No blobs plotted, returning blank image")
+        plt.savefig(str(out_path), bbox_inches="tight")
+        plt.close(fig)
 
     '''
     
