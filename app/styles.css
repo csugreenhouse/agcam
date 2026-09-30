@@ -1,0 +1,22 @@
+:root {
+    --green-dark: #1E4D2B;
+    --green-light: #8ea695;
+    --cream: #FDFCF8;
+    --gray-light: #F4F1E9;
+    --black: #1A1A1A;
+    --white: #FFFFFF;
+    --font-serif: 'Almendra', serif;
+    --font-sans: 'Montserrat', sans-serif;
+}
+
+/* Global color and typography fallbacks */
+html, body, [data-testid="stAppViewContainer"] {
+    background-color: var(--cream);
+    color: var(--black);
+    font-family: var(--font-sans);
+}
+
+h1, h2, h3, h4, h5, h6 {
+    color: var(--green-dark) !important;
+    font-family: var(--font-serif) !important;
+}

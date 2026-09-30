@@ -1,0 +1,7 @@
+[theme]
+headingFont = "Almendra:https://fonts.googleapis.com/css2?family=Almendra:ital,wght@0,400;0,700;1,400;1,700&display=swap, serif"
+backgroundColor = "#FDFCF8"
+primaryColor = "#1E4D2B"
+secondaryBackgroundColor = "#F4F1E9"
+textColor = "#1A1A1A"
+font = "Montserrat:https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700&display=swap, sans-serif"

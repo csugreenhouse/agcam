@@ -6,7 +6,7 @@ GREEN_LOWER  = np.array([ 45, 120, 120], dtype="uint8")
 GREEN_UPPER  = np.array([ 75, 255, 220], dtype="uint8")
 #GREEN_BOUNDS = (GREEN_LOWER, GREEN_UPPER)
 GREEN_BOUNDS = ((31, 50, 50), (75, 255, 200))
-
+#temporary image sizing? pictures might be too big. 
 def find_green_blobs(image,
                      color_bounds=GREEN_BOUNDS,
                      open_kernel_size=(5, 5),
