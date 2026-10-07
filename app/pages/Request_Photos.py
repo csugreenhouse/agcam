@@ -7,6 +7,7 @@ import importlib
 sys.path.append("/mnt/db/agcam")
 
 db = importlib.import_module("database.database")
+cameraControl = importlib.import_module("database.cameraControl")
 
 try:
     conn = db.open_connection_to_database() 
@@ -20,3 +21,7 @@ with open("app/styles.css") as f:
 st.set_page_config(layout="wide")
 
 st.title("Request Photos")
+
+cam_number = st.number_input("Enter Camera Number", min_value=0, step=1)
+if st.button("Request Photo"):
+    cameraControl.run_pic_pipeline(cam_number)
