@@ -1,5 +1,3 @@
-#run the app by doing streamlit run app/Home.py
-
 import streamlit as st
 import pandas as pd
 import numpy as np
@@ -20,10 +18,21 @@ except Exception as e:
 with open("app/styles.css") as f:
     st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
 
-print("Loading app")
-
 st.set_page_config(layout="wide")
 
-st.title("Welcome to Agcam")
+st.title("View Images")
 
-st.html(open(Path("app/home.html")).read())
+cam_number = st.number_input("Enter Camera Number", min_value=0, step=1)
+
+def latest_file(path: Path, pattern: str = "*"):
+    files = list(path.glob(pattern))
+    if not files:
+        return None
+    return max(files, key=lambda x: x.stat().st_ctime)
+
+def get_image(cam_number):
+    folder_path = f"/mnt/image/images-processed/{cam_number}CAM"
+    image_path = latest_file(Path(folder_path))
+    return image_path
+
+st.image(get_image(cam_number), caption=f"Camera {cam_number} Latest Processed Image")
