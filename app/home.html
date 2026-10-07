@@ -455,6 +455,83 @@
                 font-size: 0.85rem;
             }
         }
+        /* Team Profiles Grid */
+        /*.team-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 30px;
+            margin-top: 40px;
+        }*/
+
+        .team-grid {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center; /* Centers items on all rows, including the last one */
+            gap: 30px;
+            margin-top: 40px;
+        }
+
+        .team-card {
+            flex: 0 1 260px; /* Base width of 260px, doesn't stretch awkwardly */
+            background: var(--white);
+            padding: 30px 20px;
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: 0 6px 18px rgba(0,0,0,0.06);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        /*.team-card {
+            background: var(--white);
+            padding: 30px 20px;
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: 0 6px 18px rgba(0,0,0,0.06);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }*/
+
+        .team-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 24px rgba(0,0,0,0.1);
+        }
+
+        .member-photo {
+            width: 130px;
+            height: 130px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-bottom: 20px;
+            border: 3px solid var(--green-dark);
+            background-color: var(--gray-light);
+        }
+
+        .team-card h3 {
+            margin: 10px 0 5px 0;
+            font-size: 1.25rem;
+        }
+
+        .member-major {
+            display: inline-block;
+            font-size: 0.8rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: var(--green-dark);
+            letter-spacing: 1px;
+            margin-bottom: 12px;
+        }
+
+        .member-focus {
+            font-size: 0.9rem;
+            color: #444;
+            margin-bottom: 0;
+            line-height: 1.5;
+        }
     </style>
 </head>
 <body>
@@ -466,7 +543,7 @@
             <a href="#timeline">Timeline</a>
             <a href="#development">Development</a>
         </div>
-        <a href="https://github.com/csugreenhouse" class="github-btn">GITHUB ➽</a>
+        <a href="https://github.com/csugreenhouse/agcam" class="github-btn">GITHUB ➽</a>
     </nav>
 
     <header id="home">
@@ -474,20 +551,20 @@
             <div class="hero-text left">
                 <p>Colorado State University<br>ECE Senior Design Project<br>Automated Greenhouse</p>
             </div>
-            <h1>GAIA</h1>
+            <h1>AgCam </h1>
             <div class="hero-text right">
-                <p>In Collaboration with<br>the Horticulture Department</p>
+                <p>In Collaboration with<br>the Horticulture Department and Chemical and Biological Engineering </p>
             </div>
         </div>
 
         <div class="team-section">
             <div class="team-group">
                 <span class="team-label">Senior Design Team</span>
-                <p>Tyler Carver, Kai Brennan</p>
+                <p>Kai Brennan, Abby Robertson, Luke Portugal, Jakub Bilison, Will Barrington</p>
             </div>
             <div class="team-group">
                 <span class="team-label">VIP Students Team</span>
-                <p>Elias Faughn, Mia White, Konstanz Searle, Taven Hartman</p>
+                <p>Sara Almousawi</p>
             </div>
             <div class="team-group">
                 <span class="team-label">Professor & EIR Team</span>
@@ -507,36 +584,31 @@
     </section>-->
 
     <section id="overview">
-        <div class="content-wrapper">
-            <div class="text-content">
                 <h2>Project Overview</h2>
                 <h3>Overview</h3>
 
                 <p>
-This project focuses on the design of an automated greenhouse that uses image-based estimation to index each plant's information over time. We also record other metrics and sensors to ensure a beneficial growing environment. Our long-term goal is to make the greenhouse responsive to the current states of the plants, fully autonomously.                </p>
+This project focuses on the design of an automated greenhouse that uses image-based estimation to index each plant's information over time.  Our long-term goal is to make the greenhouse responsive to the current states of the plants, fully autonomously.                </p>
 
 
 
-                <h3>Importance</h3>
+                <h3>Horticulture Department</h3>
+                <p>
+                    We are in close collaboration with the CSU Horticulture Department, which currently uses a system that ignores valuable plant data and is reliant on manual labor. Our project aims to create a more efficient system and to non-invasively measure the plants, reducing the strain of maintaining a greenhouse.
+                </p>
+                <h3>Chemical and Biological Engineering </h3>
 
                 <p>
-                    Aquaponics is an expanding technique for modern environments, and a logical next step is to implement engineering methods to automate it. We are in close collaboration with the CSU Horticulture Department, which currently uses a system that ignores valuable plant data and is reliant on manual labor. Our project aims to create a more efficient system and to non-invasively measure the plants, reducing the strain of maintaining a greenhouse and providing automatic feedback.
+                    We are also in collaboration with Chemical and Biological engineering. The primary goal is to cultivate duckweed expediently as a high yield alternative protein source. The primary focus will be converting the current aquaponics system into a system that can support duckweed. 
                 </p>
 
                
 
                 <h3>Highlighted Goals</h3>
 
-                <p>Our work this semester seeks to provide a foundation to realize the ultimate 'automated' goal of the greenhouse. By creating many data tracking systems, we hope to make it possible in the coming semesters to apply machine learning to respond to the plants to create an ideal growing environment.</p>
+                <p>The goal of this project this semester is to create an automated monitoring system to aid in the production of Poinsettias for the horticulture department. We are using image based metrics and OpenCV to determine the plant and growth.             </p>
 
 
-            </div>
-
-            <div class="images">
-                <img src="app/images/greenhousewplants.png" alt="GAIA Greenhouse with Plants">
-                <img src="app/images/plant_estimator.png" alt="Plant Estimation System">
-            </div>
-        </div>
     </section>
 
     <section id="timeline" class="gray-bg">
@@ -546,20 +618,32 @@ This project focuses on the design of an automated greenhouse that uses image-ba
             <div class="timeline">
                 <div class="timeline-item left">
                     <div class="timeline-content">
-                        <h3>Phase 1: Metric Foundation</h3>
-                        <p>Establishing the automated pipeline for height and width requests with 1cm accuracy targets.</p>
+                        <h3>Phase 1: Hardware and Power</h3>
+                        <ul>
+                            <li>Retrofit greenhouse trays for duckweed</li>
+                            <li>Create the housings and mounts for both power and cameras</li>
+                            <li>Build the solar and battery module</li>
+                        </ul>
+                        
                     </div>
                 </div>
                 <div class="timeline-item right">
                     <div class="timeline-content">
-                        <h3>Phase 2: Advanced Analysis</h3>
-                        <p>Moving from 2D metrics to area and 3D surface area estimation using multi-image processing.</p>
+                        <h3>Phase 2: Imaging and Testing </h3>
+                        <ul>
+                            <li>Calibrate cameras in the Horticulture greenhoues</li>
+                            <li>Create the housings and mounts for both power and cameras</li>
+                            <li>Build the solar and battery module</li>
+                        </ul>
                     </div>
                 </div>
                 <div class="timeline-item left">
                     <div class="timeline-content">
-                        <h3>Phase 3: Integration & UI</h3>
-                        <p>Finalizing hardware redundancy and launching the database UI for the Horticulture Dept.</p>
+                        <h3>Phase 3: Deployment and Delivery </h3>
+                        <ul>
+                            <li>Deliver the data to the Horticulture department. </li>
+                            <li>Validate duckweed containment and harvesting with the CBE team.</li>
+                        </ul>
                     </div>
                 </div>
             </div>
@@ -583,38 +667,40 @@ This project focuses on the design of an automated greenhouse that uses image-ba
                     <tbody>
                         <tr>
                             <td><strong>Primary Objectives</strong></td>
-                            <td>Height, Width, Area, and investigation into a 3D Surface Area Capture</td>
-                            <td>Automated twice-daily logs; 1cm accuracy goal</td>
+                            <td>Implement cameras in Horticulture greenhouse<br><br>
+                                Assist in growing duckweed for CBE
+                            </td>
+
+                            <td>Automate once-daily logs of plant height<br> <br>Alter the current set up to meet CBE's duckweed needs. 
+
+
+                            </td>
                         </tr>
                         <tr>
-                            <td><strong>Hardware Upgrades</strong></td>
-                            <td>SSD for Raspberry Pi, Hardwired Power for ESP32-Cam</td>
-                            <td>Fix network connectivity & power brownouts</td>
-                        </tr>
-                        <tr>
-                            <td><strong>Hardware Repairs</strong></td>
-                            <td>Power stabilization, SD Card replacement, general repairs, and sensor calibration</td>
+                            <td><strong>OpenCV classification </strong></td>
+                            <td>Implement OpenCV on classifying the plants </td>
                             <td>Ensure reliability for continuous data collection</td>
                         </tr>
                         <tr>
-                            <td><strong>New Sensors</strong></td>
-                            <td>Water Leak Detectors, Flow Sensors, Photoresistors</td>
-                            <td>Redundancy checks & automated email alerts</td>
+                            <td><strong>Duckweed Trays </strong></td>
+                            <td>Retrofit existing greenhouse trays for aquatic duckweed containment and water circulation </td>
+                            <td>Prevent system leaks and implement a safe collection method of duckweed</td>
                         </tr>
                         <tr>
-                            <td><strong>Risk Management</strong></td>
-                            <td>Server Crashes, Arduino Port Limits, Water Leaks</td>
-                            <td>Mitigation: Daily backups & ESP32 expansion</td>
+                            <td><strong>Camera Housing & Mounts</strong></td>
+                            <td>Create a housing for Pi zeros and Cameras as well as creating mounts for the modules</td>
+                            <td>Protect hardware from moisture and maintain fixed focal positions for cameras. </td>
                         </tr>
                         <tr>
-                            <td><strong>Horticulture Collab</strong></td>
-                            <td>Dept. Meetings & Objective Review</td>
-                            <td>Scheduled for February 2026</td>
+                            <td><strong>Power system and housing </strong></td>
+                            <td>Design and integrate a solar power charging system for the camera modules with water resistant housing</td>
+                            <td>Maintain autonomous, continuous power to the camera modules without relying on greenhouse wall outlets.</td>
                         </tr>
+                    
                         <tr>
                             <td><strong>Final Delivery</strong></td>
-                            <td>E-Days Presentation & Timelapses</td>
-                            <td>April 24, 2026</td>
+                            <td>Written Report and Oral Presentations</td>
+                            <td>Dec 14, 2026</td>
                         </tr>
                     </tbody>
                 </table>
@@ -622,18 +708,72 @@ This project focuses on the design of an automated greenhouse that uses image-ba
         </div>
     </section>
 
+    <section id="team" class="gray-bg">
+        <div class="content-wrapper">
+            <h2>Meet the Team</h2>
+            <div class="team-grid">
+                
+                <!-- Member Card -->
+                <div class="team-card">
+                    <h3>Abby Robertson</h3>
+                    <span class="member-major"> Computer Engineering</span>
+                    <p class="member-focus"><strong>Focus:</strong> Image Processing, Height Estimation & Camera Interface</p>
+                </div>
+
+                <!-- Member Card -->
+                <div class="team-card">
+                    <h3>Kai Brennan</h3>
+                    <span class="member-major">Computer Engineering</span>
+                    <p class="member-focus"><strong>Focus:</strong> Image Processing, Height Estimation & Camera Interface</p>
+                </div>
+
+
+                <!-- Member Card -->
+                <div class="team-card">
+                    <h3>Jakub Bilison</h3>
+                    <span class="member-major">Mechanical Engineering</span>
+                    <p class="member-focus"><strong>Focus:</strong> Camera Mounts and Battery housing</p>
+                </div>
+
+                <!-- Member Card -->
+                <div class="team-card">
+                    <h3>Will Barrington</h3>
+                    <span class="member-major">Mechanical Engineering</span>
+                    <p class="member-focus"><strong>Focus:</strong> Camera Mounts and Battery housing </p>
+                </div>
+
+                <!-- Member Card -->
+                <div class="team-card">
+                    <h3>Luke Portugal</h3>
+                    <span class="member-major">Electrical Engineering</span>
+                    <p class="member-focus"><strong>Focus:</strong> Power Distribution </p>
+                </div>
+                <div class="team-card">
+                    <h3>Sara Almousawi</h3>
+                    <span class="member-major">Electrical Engineering</span>
+                    <p class="member-focus"><strong>Focus:</strong> Power Distribution </p>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+
+
+
     <footer>
         <div class="footer-content">
             <div class="footer-top">
                 <span>CSU Automated Greenhouse Senior Design Project</span>
                 <span class="divider">|</span>
-                <span>GAIA</span>
+                <span>AgCam</span>
             </div>
 
             <div class="footer-required-links">
                 <a href="https://advancing.colostate.edu/ENG/ECE_SRDESIGN/GIVE">Support our program</a>
                 <a href="https://www.engr.colostate.edu/ece/senior-design/?ay=2025">Other ECE Sr. Design projects</a>
                 <a href="https://www.engr.colostate.edu/ece/">ECE Department</a>
+                <a href="https://www.engr.colostate.edu/me/">Mech Department</a>
                 <a href="http://www.colostate.edu/">CSU Main Website</a>
                 <a href="https://github.com/csugreenhouse">Project GitHub</a>
             </div>

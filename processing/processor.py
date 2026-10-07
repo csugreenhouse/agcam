@@ -62,3 +62,11 @@ def make_blobs_for_all_imgs_in_folder(folder_path):
                     process_and_make_copies_blob_visuals(file_path, cam_name)
                     db.append_photo_to_imgIndex(conn, cam_number, file_path)
     db.close_connection_to_database(conn)
+
+def process_and_stop_after():
+    print("Agcam Processing Activated")
+    try:
+        make_blobs_for_all_imgs_in_folder("/mnt/image/image-inbox") #this is the current runtime script that will process and copy photos for now.
+    except Exception as e:
+        print(e)
+        print(f"\033[91mError\033[0m")
