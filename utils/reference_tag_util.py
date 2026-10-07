@@ -3,15 +3,15 @@ import numpy as np
 import warnings
 import sys
 sys.path.append('/mnt/db/agcam')
-import apriltag
+import pupil_apriltags as apriltag
+from pupil_apriltags import Detector
 
 import database.database as database_util
 
 
 def scan_raw_tags(image):
     gray = cv2.cvtColor(image,cv2.COLOR_BGR2GRAY)
-    options = apriltag.DetectorOptions(families="tag25h9")
-    detector = apriltag.Detector(options)
+    detector = Detector(families="tag25h9")
     results = detector.detect(gray)
     return results
 
