@@ -4,10 +4,11 @@ import numpy as np
 import sys
 import importlib
 import time
+
 sys.path.append("/mnt/db/agcam")
 
 db = importlib.import_module("database.database")
-cameraControl = importlib.import_module("database.cameraControl")
+processor = importlib.import_module("processing.processor")
 
 try:
     conn = db.open_connection_to_database() 
@@ -20,14 +21,12 @@ with open("app/styles.css") as f:
 
 st.set_page_config(layout="wide")
 
-st.title("Request Photos")
+st.title("Run Processing")
 
-cam_number = st.number_input("Enter Camera Number", min_value=0, step=1)
-if st.button("Request Photo"):
-    with st.spinner("Taking Photo..."):
-        cameraControl.run_pic_pipeline(cam_number)
+if st.button("Run Processing"):
+    with st.spinner("Processing in progress."):
+        processor.make_blobs_for_all_imgs_in_folder("/mnt/image/image-inbox")
         success = st.empty()
-        success.success("Photo saved.")
+        success.success("Processing completed.")
         time.sleep(2)
         success.empty()
-    
