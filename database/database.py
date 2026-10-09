@@ -47,7 +47,7 @@ def print_imgIndex_in_terminal(conn):
     for row in results:
         print(f"cam_id: {row[0]}, file_path: {row[1]}")
     
-def query_to_CSV_file(results, CSVfile_path):
+def results_to_CSV_file(results, CSVfile_path):
     import csv
     with open(CSVfile_path, mode='w', newline='') as csv_file:
         writer = csv.writer(csv_file)
@@ -55,6 +55,19 @@ def query_to_CSV_file(results, CSVfile_path):
         for entry in results:
             writer.writerow(entry.values())
         print(CSVfile_path)
+
+def query_to_CSV(query, CSVfile_path, conn): #query of the form: COPY {tablename} TO STDOUT WITH (FORMAT CSV, HEADER);
+    import csv
+    try:
+        with conn.cursor() as cursor:
+            cursor.copy_expert(query, open(CSVfile_path, "w"))
+        conn.commit()
+        return f"CSV written at {CSVfile_path}"
+    except Exception as e:
+        conn.rollback()
+        raise LookupError(f"Database error: {e}")
+    finally:
+        pass
 
 def execute_query(conn,query,params=None):
     try:

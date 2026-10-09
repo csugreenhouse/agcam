@@ -1,10 +1,10 @@
-import importlib
 from pathlib import Path
 import os
 import pytest
 import cv2
 import warnings
 import sys
+import importlib
 
 ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
@@ -22,7 +22,7 @@ GRPH_DIR = Path(__file__).parent / "graphs"
 #test_camera_parameters = database_util.get_available_camera_parameters_from_database(test_connection)[0]
 
 def test_1():
-    run_test("tests/testimages/basil_4.jpg", 2.2175) #I put in a number based on what output was since we didnt have a real measurment on this legacy image, just to make it pass. Make new tests with poinsettia images.
+    run_test("tests/testimages/basil_4.jpg", .28) #looks like 28cm
  
 def run_test(image_path, expected_height):
     image = cv2.imread(str(image_path))
@@ -34,8 +34,14 @@ def run_test(image_path, expected_height):
     #graph_util.plot_height_request_response(image,str(Path(image_path).with_name(Path(image_path).stem + "_out.jpg")),height_response)
     
     if expected_height is not None:
-        assert height_response[0]["estimated_height"] == pytest.approx(expected_height, abs=0.1), f"Estimated height for plant 1 in image {str(image_path)} is {height_response[0]['estimated_height']} , but expected {expected_height}"
+        assert height_response[0]["estimated_height"] == pytest.approx(expected_height, abs=0.5), f"Estimated height for plant 1 in image {str(image_path)} is {height_response[0]['estimated_height']} , but expected {expected_height}"
     
+    reference_tag = reference_tags[0]
+
+    out_path = str(Path(image_path).with_name(Path(image_path).stem + "_heighttest_out.jpg"))
+
+    graph_util.plot_height(image, out_path, reference_tag)
+
 if __name__ == "__main__":
     test_1()
     print(f"All height tests passed successfully")

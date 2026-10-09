@@ -3,6 +3,8 @@ import numpy as np
 import requests
 from pathlib import Path
 from datetime import datetime
+import importlib
+
 
 def get_image_from_camera_parameter(camera_parameters):
     camera_ip = camera_parameters["ip_address"]

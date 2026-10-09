@@ -17,7 +17,7 @@ def main():
        print("Agcam Processing Activated")
 
        try:
-           processor.make_blobs_for_all_imgs_in_folder("/mnt/image/image-inbox") #this is the current runtime script that will process and copy photos for now.
+           processor.make_height_visuals_for_all_imgs_in_folder("/mnt/image/image-inbox") #this is the current runtime script that will process and copy photos for now.
        except Exception as e:
            print(e)
            print(f"\033[91mError\033[0m")

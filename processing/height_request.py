@@ -94,7 +94,7 @@ def estimate_heights_reference_tag(image, reference_tag):
     tag_top_right_corner = corners["top_right"]
     tag_bottom_right_corner = corners["bottom_right"]
     tag_bottom_left_corner = corners["bottom_left"]
-    tag_scale_units_m = .9 #estimate change to be accurate...
+    tag_scale_units_m = .07 #7cm 
     bias_units_m = 0.0
 
     heighest_green_pixel_info = get_heighest_green_pixel(image, plant_bounds=None, minimum_area_pixels=50)

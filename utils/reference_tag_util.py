@@ -5,6 +5,7 @@ import sys
 sys.path.append('/mnt/db/agcam')
 import pupil_apriltags as apriltag
 from pupil_apriltags import Detector
+import importlib
 
 import database.database as database_util
 

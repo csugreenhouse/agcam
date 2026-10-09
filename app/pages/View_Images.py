@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
 import numpy as np
+from PIL import Image
 import sys
 import importlib
 from pathlib import Path
@@ -33,6 +34,15 @@ def latest_file(path: Path, pattern: str = "*"):
 def get_image(cam_number):
     folder_path = f"/mnt/image/images-processed/{cam_number}CAM"
     image_path = latest_file(Path(folder_path))
-    return image_path
+    return Image.open(image_path)
 
-st.image(get_image(cam_number), caption=f"Camera {cam_number} Latest Processed Image")
+try:
+    img = get_image(cam_number)
+except Exception as e:
+    st.write(f"Failed to load image: {e}")
+    img = None
+
+if img is not None:
+    st.image(img, caption=f"Camera {cam_number} Latest Processed Image")
+else:
+    st.write(f"No image available for Camera {cam_number}.")
