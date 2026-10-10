@@ -38,6 +38,10 @@ def test_apritag_test01():
     assert bl == approx((262.30166625978956, 369.2857971191188),rel=1e-3,abs=0.5)
     print(f"test_apritag_test01 passed successfully") 
 
+    print(f"begin tag plotter")
+
+    graph_util.plot_reference_tag(image,dst, tag_info)
+
 '''def test_apritag_test02():
     src = IMG_DIR / "TEST02.jpg"
     dst = IMG_DIR / "TEST02_out.png"

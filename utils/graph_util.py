@@ -4,86 +4,81 @@ import matplotlib.pyplot as plt
 import warnings
 import numpy as np
 import matplotlib.patches as patches
+import importlib
+
 from matplotlib.lines import Line2D
 from utils.line_util import get_equation_of_line, get_vertical_line, fractional_height_between_lines, get_intercept_of_lines
+
+pf = importlib.import_module("utils.plant_finder_util")
+height_request = importlib.import_module("processing.height_request")
+
 
 color_pallet = ['cyan', 'yellow', 'magenta', 'orange', 'pink', 'lime', 'aqua']
 
 # PLOT THE REFERENCE TAG
 
-'''def plot_reference_tag(image,out_path, reference_tag):
+def add_tag(ax, tag, color='cyan', center_size=20):
+    try:
+        corners = tag["corners"]
+        tl = corners["top_left"]
+        tr = corners["top_right"]
+        br = corners["bottom_right"]
+        bl = corners["bottom_left"]
+    except KeyError:
+        warnings.warn("Tag corners not found, cannot plot tag.")
+        return
+    ax.add_patch(plt.Polygon([tl, tr, br, bl], fill=None, edgecolor=color, linewidth=2))
+    cx, cy = tag["center"]
+    ax.add_patch(plt.Circle((cx, cy), center_size, color=color, fill=True))
+    ax.text(tag["center"][0], tag["center"][1], str(tag["data"]), fontsize=8, ha='center', va='center')
+    ax.text(tl[0], tl[1], "TL", fontsize=8, ha='center', va='center')
+    ax.text(tr[0], tr[1], "TR", fontsize=8, ha='center', va='center')
+    ax.text(br[0], br[1], "BR", fontsize=8, ha='center', va='center')
+    ax.text(bl[0], bl[1], "BL", fontsize=8, ha='center', va='center')
+    ax.plot([], [], color=color, label=f'Tag ID: {tag["data"]}')
+
+def plot_reference_tag(image,out_path, reference_tag):
     graph_rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+
     W,H = graph_rgb.shape[1], graph_rgb.shape[0]
     fig, ax = plt.subplots()
     ax.imshow(graph_rgb)
     ax.axis('on')
 
     add_tag(ax,reference_tag)
-    views = reference_tag["views"]
 
-    for i, view in enumerate(views):
-        add_view(ax,W,H,view,facecolor=color_pallet[i])
- 
     ax.set_title("REFERENCE TAG")
 
     ax.legend(loc='upper center', bbox_to_anchor=(0.5, -0.05),ncol=2)
     plt.savefig(str(out_path), bbox_inches="tight")
-    plt.close(fig)'''
-    
+    plt.close(fig)
+
 #PLOT THE estimate_heights_reference_tags response from height_request
     
-'''def plot_height_request_response(image, out_path, response):
+def plot_height(image, out_path, reference_tag):
     graph_rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
     W,H = graph_rgb.shape[1], graph_rgb.shape[0]
     fig, ax = plt.subplots()
-    
-    for i, view_response in enumerate(response):
-        add_tag(ax,view_response["reference_tag"], color=color_pallet[i%len(color_pallet)])
-        color = color_pallet[i%len(color_pallet)]
-        plant_id = view_response["plant_id"]
-        estimated_height = view_response["estimated_height"]
-        green_blob_list = view_response["green_blob_list"]
-        tag_bias = view_response["bias_units_m"]
-        add_point(ax,view_response["heighest_green_pixel"],color="green")
-        add_plant_bounds(ax,W,H,view_response["plant_bounds"],color=color)
-        add_green_blobs(ax,green_blob_list,color)
-        ax.plot([], [], color=color, label=
-                f"plant {plant_id}: {round(estimated_height*100,2)}cm FH {round(view_response['fractional_height']*100,2)}cm \n"
-                  f"bias: {round(tag_bias*100,2)}cm color bounds: {view_response['color_bounds'][0]},{view_response['color_bounds'][1]}\n")
+
+    add_tag(ax,reference_tag)
+    color = color_pallet[0]
+
+    green_blob_list = pf.find_green_blobs(image)
+    add_green_blobs(ax,green_blob_list,color)
+
+    view_response = height_request.estimate_heights_reference_tag(image, reference_tag)
+
+    estimated_height = view_response[0]["estimated_height"]
+        
+    ax.plot([], [], color=color, label=
+            f"Estimated Height: {round(estimated_height*100,2)}cm \n")
     
     ax.imshow(graph_rgb)
     ax.axis('on')
     ax.legend(loc='upper center', bbox_to_anchor=(0.5, -0.05),ncol=1)
     plt.savefig(str(out_path), bbox_inches="tight")
     plt.close(fig)
-    '''
-'''
-def plot_widths_request_response(image, out_path, response):
-    graph_rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-    W,H = graph_rgb.shape[1], graph_rgb.shape[0]
-    fig, ax = plt.subplots()
-    ax.imshow(graph_rgb)
-    ax.axis('on')
-    
-    for i, view_response in enumerate(response):
-        add_tag(ax,view_response["reference_tag"], color=color_pallet[i%len(color_pallet)])#outline tag
-        color = color_pallet[i%len(color_pallet)]
-        plant_id = view_response["plant_id"]
-        estimated_width = view_response["estimated_width"]
-        green_blob_list = view_response["green_blob_list"]
-        add_point(ax, view_response["leftmost_green_pixel"], color="blue")
-        add_point(ax, view_response["rightmost_green_pixel"], color="red")
-        add_plant_bounds(ax,W,H,view_response["plant_bounds"],color=color)
-        add_green_blobs(ax,green_blob_list,color)
-        ax.plot([], [], color=color, label=f"plant {plant_id}: {round(estimated_width*100,2)}cm FH {round(view_response['fractional_width']*100,2)}cm")
-        
-    ax.legend(loc='upper center', bbox_to_anchor=(0.5, -0.05),ncol=2)
 
-    plt.savefig(str(out_path), bbox_inches="tight")
-    plt.close(fig)
-    '''
-
-#plot blobs alone
 def plot_blobs(image, out_path, blobs):
     graph_rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
     W,H = graph_rgb.shape[1], graph_rgb.shape[0]
@@ -102,7 +97,7 @@ def plot_blobs(image, out_path, blobs):
         plt.savefig(str(out_path), bbox_inches="tight")
         plt.close(fig)
 
-    '''
+'''
     
 def plot_calculated_displacements_graph_info(image, out_path, reference_tag):
     graph_rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
@@ -116,9 +111,7 @@ def plot_calculated_displacements_graph_info(image, out_path, reference_tag):
     ax.legend(loc='upper center', bbox_to_anchor=(0.5, -0.05),ncol=2)
     plt.savefig(str(out_path), bbox_inches="tight")
     plt.close(fig)
-    '''
 
-    '''
 
 def add_tag_displacement_relative_to_camera(ax, W, H, reference_tag, color=None):
     if color is None:
@@ -143,8 +136,8 @@ def add_tag_displacement_relative_to_camera(ax, W, H, reference_tag, color=None)
     ax.plot([], [], color=color[1], label='Horizontal Displacement (x)\n %.6f cm' % (displacement_x*100))
     ax.plot([], [], color=color[2], label='Vertical Displacement (y)\n %.6f cm' % (displacement_y*100))
     ax.plot([], [], color='black', label='Distance to QR Code (d)\n %.6f cm' % (displacement_d*100))
-    '''
-    '''
+   
+    
 
 def add_camera_view_frustum(ax, heighest_green_pixel,camera_parameters, reference_tag, color='yellow'):
     width = camera_parameters["width"]
@@ -165,29 +158,7 @@ def add_camera_view_frustum(ax, heighest_green_pixel,camera_parameters, referenc
 
     ax.plot([heighest_green_pixel[0], x_point], [heighest_green_pixel[1], y_point], color=color, linewidth=1)
     ax.plot([], [], color=color, label='Camera View to Heighest Plant Pixel \n (May indicate occlusion or steep angle)')
-    '''
-    '''
-
-def add_tag(ax, tag, color='cyan', center_size=20):
-    try:
-        corners = tag["corners"]
-        tl = corners["top_left"]
-        tr = corners["top_right"]
-        br = corners["bottom_right"]
-        bl = corners["bottom_left"]
-    except KeyError:
-        warnings.warn("Tag corners not found, cannot plot tag.")
-        return
-    ax.add_patch(plt.Polygon([tl, tr, br, bl], fill=None, edgecolor=color, linewidth=2))
-    cx, cy = tag["center"]
-    ax.add_patch(plt.Circle((cx, cy), center_size, color=color, fill=True))
-    ax.text(tag["center"][0], tag["center"][1], str(tag["data"]), fontsize=8, ha='center', va='center')
-    ax.text(tl[0], tl[1], "TL", fontsize=8, ha='center', va='center')
-    ax.text(tr[0], tr[1], "TR", fontsize=8, ha='center', va='center')
-    ax.text(br[0], br[1], "BR", fontsize=8, ha='center', va='center')
-    ax.text(bl[0], bl[1], "BL", fontsize=8, ha='center', va='center')
-    ax.plot([], [], color=color, label=f'Tag ID: {tag["data"]}')
-    '''
+ '''
 
 def add_green_blobs(ax, plant_blob_list, color='lime'):
     for blob in plant_blob_list:
