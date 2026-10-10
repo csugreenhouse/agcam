@@ -9,7 +9,6 @@ import importlib
 
 sys.path.append("/mnt/db/agcam")
 
-
 processor = importlib.import_module("processing.processor")
 
 def main():

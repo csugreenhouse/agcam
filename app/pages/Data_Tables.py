@@ -22,6 +22,6 @@ x = st.selectbox('Select a cam id', options=['cam0', 'cam1', 'cam2'])
 
 where_option = f"cam_id = '{x[-1]}'"
 table_name = "imgIndex"
-dataframe = db.return_table_as_dataframe(conn, table_name, where_option=None)
+dataframe = db.return_table_as_dataframe(conn, table_name, where_option)
 
 st.table(dataframe)
