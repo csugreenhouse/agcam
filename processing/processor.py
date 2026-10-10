@@ -51,7 +51,6 @@ def process_and_make_copies_blob_visuals(file_path,cam_number):
     print("\033[32m" + f"Processed and saved blobs to {processed_file_path}" + "\033[0m")
 
 def make_blobs_for_all_imgs_in_folder(folder_path):
-    conn = db.open_connection_to_database()
     for folder in os.listdir(folder_path):
         folder_full_path = os.path.join(folder_path, folder)
         if os.path.isdir(folder_full_path):
@@ -61,22 +60,6 @@ def make_blobs_for_all_imgs_in_folder(folder_path):
                     cam_name=str(folder)
                     cam_number = int(cam_name[0])
                     process_and_make_copies_blob_visuals(file_path, cam_name)
-                    db.append_photo_to_imgIndex(conn, cam_number, file_path)
-    db.close_connection_to_database(conn)
-
-def make_blobs_for_all_imgs_in_folder(folder_path):
-    conn = db.open_connection_to_database()
-    for folder in os.listdir(folder_path):
-        folder_full_path = os.path.join(folder_path, folder)
-        if os.path.isdir(folder_full_path):
-            for file_name in os.listdir(folder_full_path):
-                if file_name.endswith(".jpg") or file_name.endswith(".png"):
-                    file_path = os.path.join(folder_full_path, file_name)
-                    cam_name=str(folder)
-                    cam_number = int(cam_name[0])
-                    process_and_make_copies_blob_visuals(file_path, cam_name)
-                    db.append_photo_to_imgIndex(conn, cam_number, file_path)
-    db.close_connection_to_database(conn)
 
 def process_and_make_copies_height_visuals(file_path,cam_name):
     #section 1: Prepare directories for processed and archived images
