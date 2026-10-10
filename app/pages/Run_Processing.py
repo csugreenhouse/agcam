@@ -8,17 +8,9 @@ import time
 sys.path.append("/mnt/db/agcam")
 st.title("Run Processing")
 
-
-db = importlib.import_module("database.database")
 processor = importlib.import_module("processing.processor")
 
 st.set_page_config(layout="wide")
-
-try:
-    conn = db.open_connection_to_database() 
-    print("Successfully opened connection to database")
-except Exception as e:
-    st.error(f"Failed to open connection to database: {e}")
 
 with open("app/styles.css") as f:
     st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
