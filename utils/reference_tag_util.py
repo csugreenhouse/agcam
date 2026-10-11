@@ -7,7 +7,7 @@ import pupil_apriltags as apriltag
 from pupil_apriltags import Detector
 import importlib
 
-import database.database as database_util
+import utils.database_util as database_util
 
 
 def scan_raw_tags(image):

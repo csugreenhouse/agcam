@@ -19,6 +19,7 @@ def open_connection_to_database():
             user=secrets["PG_USER"],
             password=secrets["PG_PASSWORD"]
         )
+        print("Successfully opened connection to database")
         return conn
     except Exception as e:
         print(f"Database connection error: {e}")
@@ -56,8 +57,9 @@ def results_to_CSV_file(results, CSVfile_path):
             writer.writerow(entry.values())
         print(CSVfile_path)
 
-def query_to_CSV(query, CSVfile_path, conn): #query of the form: COPY {tablename} TO STDOUT WITH (FORMAT CSV, HEADER);
+def query_to_CSV(tablename, CSVfile_path, conn): #query of the form: COPY {tablename} TO STDOUT WITH (FORMAT CSV, HEADER);
     import csv
+    query = f"COPY {tablename} TO STDIN CSV HEADER;"
     try:
         with conn.cursor() as cursor:
             cursor.copy_expert(query, open(CSVfile_path, "w"))
@@ -85,3 +87,16 @@ def execute_query(conn,query,params=None):
         raise LookupError(f"Database error: {e}")
     finally:
         pass
+
+def return_table_as_dataframe(conn, table_name, where_option=None):
+    import pandas as pd
+    dataframe = pd.read_sql(f"SELECT * FROM imgIndex WHERE ", conn)
+
+    query = f"SELECT * FROM {table_name}"
+    if where_option:
+        query += f" WHERE {where_option}"
+    try:
+        df = pd.read_sql(query, conn)
+        return df
+    except Exception as e:
+        raise LookupError(f"Database error: {e}")

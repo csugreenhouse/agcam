@@ -14,7 +14,7 @@ sys.path.append("/mnt/db/agcam")
 gu = importlib.import_module("utils.graph_util")
 scanner_util = importlib.import_module("utils.reference_tag_util")
 pf = importlib.import_module("utils.plant_finder_util")
-db = importlib.import_module("database.database")
+db = importlib.import_module("utils.database_util")
 
 def process_and_make_copies_blob_visuals(file_path,cam_number):
     #section 1: Prepare directories for processed and archived images

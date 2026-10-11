@@ -6,14 +6,7 @@ import importlib
 import time
 sys.path.append("/mnt/db/agcam")
 
-db = importlib.import_module("database.database")
-cameraControl = importlib.import_module("database.cameraControl")
-
-try:
-    conn = db.open_connection_to_database() 
-    print("Successfully opened connection to database")
-except Exception as e:
-    st.error(f"Failed to open connection to database: {e}")
+cameraControl = importlib.import_module("utils.cameraControl_util")
 
 with open("app/styles.css") as f:
     st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
