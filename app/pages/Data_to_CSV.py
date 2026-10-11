@@ -23,7 +23,7 @@ if st.button("Request CSV"):
     with st.spinner("Generating CSV..."):
         CSVfile_path = f"/mnt/db/agcam/app/pages/csv_out.csv"
         tablename = "imgIndex" #change later.
-        db.query_to_CSV(tablename, CSVfile_path, conn)
+        db.table_to_CSV(tablename, CSVfile_path, conn)
         st.success(f"CSV generated at {CSVfile_path}")
         with open(CSVfile_path) as f:
             st.download_button('Download CSV', f)
