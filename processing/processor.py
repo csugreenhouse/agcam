@@ -14,7 +14,7 @@ sys.path.append("/mnt/db/agcam")
 gu = importlib.import_module("utils.graph_util")
 scanner_util = importlib.import_module("utils.reference_tag_util")
 pf = importlib.import_module("utils.plant_finder_util")
-db = importlib.import_module("database.database")
+db = importlib.import_module("utils.database_util")
 
 def process_and_make_copies_blob_visuals(file_path,cam_number):
     #section 1: Prepare directories for processed and archived images
@@ -51,7 +51,6 @@ def process_and_make_copies_blob_visuals(file_path,cam_number):
     print("\033[32m" + f"Processed and saved blobs to {processed_file_path}" + "\033[0m")
 
 def make_blobs_for_all_imgs_in_folder(folder_path):
-    conn = db.open_connection_to_database()
     for folder in os.listdir(folder_path):
         folder_full_path = os.path.join(folder_path, folder)
         if os.path.isdir(folder_full_path):
@@ -61,22 +60,6 @@ def make_blobs_for_all_imgs_in_folder(folder_path):
                     cam_name=str(folder)
                     cam_number = int(cam_name[0])
                     process_and_make_copies_blob_visuals(file_path, cam_name)
-                    db.append_photo_to_imgIndex(conn, cam_number, file_path)
-    db.close_connection_to_database(conn)
-
-def make_blobs_for_all_imgs_in_folder(folder_path):
-    conn = db.open_connection_to_database()
-    for folder in os.listdir(folder_path):
-        folder_full_path = os.path.join(folder_path, folder)
-        if os.path.isdir(folder_full_path):
-            for file_name in os.listdir(folder_full_path):
-                if file_name.endswith(".jpg") or file_name.endswith(".png"):
-                    file_path = os.path.join(folder_full_path, file_name)
-                    cam_name=str(folder)
-                    cam_number = int(cam_name[0])
-                    process_and_make_copies_blob_visuals(file_path, cam_name)
-                    db.append_photo_to_imgIndex(conn, cam_number, file_path)
-    db.close_connection_to_database(conn)
 
 def process_and_make_copies_height_visuals(file_path,cam_name):
     #section 1: Prepare directories for processed and archived images
@@ -97,10 +80,7 @@ def process_and_make_copies_height_visuals(file_path,cam_name):
 
     #step 2: process & check for successful processing
 
-    reference_tags = scanner_util.scan_reference_tags(img)
-    reference_tag = reference_tags[0]
-
-    gu.plot_height(img, out_path, reference_tag)
+    gu.plot_height(img, out_path)
    
     archived_file_path = archived_folder_path + image_name
     os.rename(file_path, archived_file_path)
@@ -125,5 +105,3 @@ def process_and_stop_after():
     except Exception as e:
         print(e)
         print(f"\033[91mError\033[0m")
-
-process_and_stop_after()

@@ -7,7 +7,7 @@ import pupil_apriltags as apriltag
 from pupil_apriltags import Detector
 import importlib
 
-import database.database as database_util
+import utils.database_util as database_util
 
 
 def scan_raw_tags(image):
@@ -34,7 +34,7 @@ def scan_reference_tags(image, current_only=False):
         if (len(results)!=0):
             raise ValueError(f"No Valid reference tag has been detected, but a non valid one has been found")
         else:
-            raise ValueError(f"No reference tags at all have been found")
+            print(f"Warning: No reference tags have been found")
   
     return reference_tags
 
