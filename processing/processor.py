@@ -80,10 +80,7 @@ def process_and_make_copies_height_visuals(file_path,cam_name):
 
     #step 2: process & check for successful processing
 
-    reference_tags = scanner_util.scan_reference_tags(img)
-    reference_tag = reference_tags[0]
-
-    gu.plot_height(img, out_path, reference_tag)
+    gu.plot_height(img, out_path)
    
     archived_file_path = archived_folder_path + image_name
     os.rename(file_path, archived_file_path)
