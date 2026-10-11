@@ -108,5 +108,3 @@ def process_and_stop_after():
     except Exception as e:
         print(e)
         print(f"\033[91mError\033[0m")
-
-process_and_stop_after()
