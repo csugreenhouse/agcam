@@ -110,7 +110,7 @@ def add_line(ax, equation, color='yellow', linestyle='--', label=None):
 # FULL GRAPHING UTILITIES
 #####################################
 
-def plot_height(image, out_path): #stress test with: plant with tag. Plant with no tag. tag with no plant. Blank image.
+def plot_height(image, out_path): #stress test with: plant with tag. Plant with no tag. tag with no plant. Blank image. Returns (tag, height, out_path) if tag and plant present.
     graph_rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
     W,H = graph_rgb.shape[1], graph_rgb.shape[0]
     fig, ax = plt.subplots()
@@ -122,10 +122,14 @@ def plot_height(image, out_path): #stress test with: plant with tag. Plant with 
 
         if len(reference_tags) != 0 and len(green_blob_list) != 0: #common case-tag and plant present
             reference_tag = reference_tags[0]
+            
             add_tag(ax,reference_tag)
-            add_green_blobs(ax,green_blob_list,color) #3rd add blobs to graph.
+            add_green_blobs(ax,green_blob_list,color)
+
             view_response = height_request.estimate_heights_reference_tag(image, reference_tag)
             estimated_height = view_response[0]["estimated_height"]
+
+            #this is the only instance that should be logged to the database.
 
         if len(reference_tags) != 0 and len(green_blob_list) == 0:
             print("No green blobs found, plotting reference tag only.")
@@ -153,6 +157,11 @@ def plot_height(image, out_path): #stress test with: plant with tag. Plant with 
     ax.legend(loc='upper center', bbox_to_anchor=(0.5, -0.05),ncol=1)
     plt.savefig(str(out_path), bbox_inches="tight")
     plt.close(fig)
+
+    #returns for database entries.
+    if len(reference_tags) != 0 and len(green_blob_list) != 0:
+        return (int(reference_tag['data']), float(estimated_height), out_path)
+    return None
 
 '''
     
