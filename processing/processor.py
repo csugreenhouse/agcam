@@ -62,6 +62,7 @@ def make_blobs_for_all_imgs_in_folder(folder_path):
                     process_and_make_copies_blob_visuals(file_path, cam_name)
 
 def process_and_make_copies_height_visuals(file_path,cam_name):
+    print (f"Processing height visuals for file: {file_path} and camera: {cam_name}")
     #section 1: Prepare directories for processed and archived images
     processed_folder_path = f"/mnt/image/images-processed/{cam_name}/"
     Path(processed_folder_path).mkdir(parents=True, exist_ok=True)
@@ -80,12 +81,26 @@ def process_and_make_copies_height_visuals(file_path,cam_name):
 
     #step 2: process & check for successful processing
 
-    gu.plot_height(img, out_path)
+    response = gu.plot_height(img, out_path)
+
+    cam_number = int(cam_name[0])
+
+    # step 3: log the estimated height to the database if available
+    if response is not None:
+        conn = db.open_connection_to_database()
+        #GET int timestamp from file path, of the form .../ID1234_20260817T160013Z.jpg
+        timestamp = int(file_path.rsplit("/",1)[-1].split("_")[1].split(".")[0].replace("T","").replace("Z",""))
+        #return from response is : return (reference_tag_number, float(estimated_height), out_path)
+        db.log_height(conn, cam_number, timestamp, response[0], response[1], response[2])
    
     archived_file_path = archived_folder_path + image_name
     os.rename(file_path, archived_file_path)
 
     print("\033[32m" + f"Processed and saved height visuals to {out_path}" + "\033[0m")
+
+    #manual delay to stop processor from choking
+
+    time.sleep(5)
 
 def make_height_visuals_for_all_imgs_in_folder(folder_path):
     for folder in os.listdir(folder_path):
@@ -98,6 +113,8 @@ def make_height_visuals_for_all_imgs_in_folder(folder_path):
                     cam_number = int(cam_name[0])
                     process_and_make_copies_height_visuals(file_path, cam_name)
                     
+
+#note, because I ran bulk processing while still troubleshooting, the processed images have errors. once plant detect is good, we will have to rerun. also processor could use more error handling so it doesnt stop mid process for certain errors. (invalid ref tag, etc)
 def process_and_stop_after():
     print("Agcam Processing Activated")
     try:

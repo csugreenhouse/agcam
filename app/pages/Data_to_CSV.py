@@ -18,11 +18,11 @@ st.set_page_config(layout="wide")
 st.title("Data to CSV")
 
 #this section of code allows the user to specify a cam id and get database entries for it.
-x = st.selectbox('Select a cam id', options=['cam0', 'cam1', 'cam2'])
+x = st.selectbox('Select a table', options=['heights', 'imgIndex'])
 if st.button("Request CSV"):
     with st.spinner("Generating CSV..."):
         CSVfile_path = f"/mnt/db/agcam/app/pages/csv_out.csv"
-        tablename = "imgIndex" #change later.
+        tablename = x
         db.table_to_CSV(tablename, CSVfile_path, conn)
         st.success(f"CSV generated at {CSVfile_path}")
         with open(CSVfile_path) as f:

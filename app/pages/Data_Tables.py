@@ -18,10 +18,9 @@ st.set_page_config(layout="wide")
 st.title("Data Tables")
 
 #this section of code allows the user to specify a cam id and get database entries for it.
-x = st.selectbox('Select a cam id', options=['cam0', 'cam1', 'cam2'])
+x = st.selectbox('Select a table', options=['heights', 'imgIndex'])
 
-where_option = f"cam_id = '{x[-1]}'"
-table_name = "imgIndex"
-dataframe = db.return_table_as_dataframe(conn, table_name, where_option)
+table_name = x
+dataframe = db.return_table_as_dataframe(conn, table_name)
 
 st.table(dataframe)

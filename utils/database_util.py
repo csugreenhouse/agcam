@@ -67,6 +67,16 @@ def append_photo_to_imgIndex(conn, cam_id, file_path): #need to generalize to be
     except Exception as e:
         print(f"Error appending photo to imgIndex: {e}")
 
+def log_height(conn, cam_id, time_stamp, tag, height, file_path):
+    query = (
+        "INSERT INTO heights (cam_id, time_stamp, tag, height, file_path) "
+        "VALUES (%s, %s, %s, %s, %s);"
+    )
+    try:
+        execute_query(conn, query, (cam_id, time_stamp, tag, height, file_path))
+    except Exception as e:
+        print(f"Error logging height: {e}")
+
 ####################################################
 # Functions that are used to output database tables.
 ####################################################
