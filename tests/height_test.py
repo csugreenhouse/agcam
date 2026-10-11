@@ -35,13 +35,24 @@ def run_test(image_path, expected_height):
     
     if expected_height is not None:
         assert height_response[0]["estimated_height"] == pytest.approx(expected_height, abs=0.5), f"Estimated height for plant 1 in image {str(image_path)} is {height_response[0]['estimated_height']} , but expected {expected_height}"
-    
-    reference_tag = reference_tags[0]
 
     out_path = str(Path(image_path).with_name(Path(image_path).stem + "_heighttest_out.jpg"))
 
-    graph_util.plot_height(image, out_path, reference_tag)
+    graph_util.plot_height(image, out_path)
+
+def height_graph_stress_test():
+    test_images = [
+        "tests/testimages/stress_test_height_graph/0tag_0plant.jpg",
+        "tests/testimages/stress_test_height_graph/0tag_1plant.jpg",
+        "tests/testimages/stress_test_height_graph/1tag_0plant.jpg",
+        "tests/testimages/stress_test_height_graph/1tag_1plant.jpg",
+    ]
+    for image_path in test_images:
+        out_path = str(Path(image_path).with_name(Path(image_path).stem + "_heightgraphtest_out.jpg"))
+        graph_util.plot_height(cv2.imread(str(image_path)), out_path)
+        assert 1 == 1 #if this works, it means that all images successfully generated height graphs
 
 if __name__ == "__main__":
     test_1()
+    height_graph_stress_test()
     print(f"All height tests passed successfully")

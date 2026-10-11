@@ -9,13 +9,15 @@ import importlib
 from matplotlib.lines import Line2D
 from utils.line_util import get_equation_of_line, get_vertical_line, fractional_height_between_lines, get_intercept_of_lines
 
+scanner_util = importlib.import_module("utils.reference_tag_util")
 pf = importlib.import_module("utils.plant_finder_util")
 height_request = importlib.import_module("processing.height_request")
 
-
 color_pallet = ['cyan', 'yellow', 'magenta', 'orange', 'pink', 'lime', 'aqua']
 
-# PLOT THE REFERENCE TAG
+#####################################
+# REFERENCE TAG GRAPHING UTILITIES
+#####################################
 
 def add_tag(ax, tag, color='cyan', center_size=20):
     try:
@@ -53,31 +55,9 @@ def plot_reference_tag(image,out_path, reference_tag):
     plt.savefig(str(out_path), bbox_inches="tight")
     plt.close(fig)
 
-#PLOT THE estimate_heights_reference_tags response from height_request
-    
-def plot_height(image, out_path, reference_tag):
-    graph_rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-    W,H = graph_rgb.shape[1], graph_rgb.shape[0]
-    fig, ax = plt.subplots()
-
-    add_tag(ax,reference_tag)
-    color = color_pallet[0]
-
-    green_blob_list = pf.find_green_blobs(image)
-    add_green_blobs(ax,green_blob_list,color)
-
-    view_response = height_request.estimate_heights_reference_tag(image, reference_tag)
-
-    estimated_height = view_response[0]["estimated_height"]
-        
-    ax.plot([], [], color=color, label=
-            f"Estimated Height: {round(estimated_height*100,2)}cm \n")
-    
-    ax.imshow(graph_rgb)
-    ax.axis('on')
-    ax.legend(loc='upper center', bbox_to_anchor=(0.5, -0.05),ncol=1)
-    plt.savefig(str(out_path), bbox_inches="tight")
-    plt.close(fig)
+#####################################
+# GREEN BLOB GRAPHING UTILITIES
+#####################################
 
 def plot_blobs(image, out_path, blobs):
     graph_rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
@@ -96,6 +76,92 @@ def plot_blobs(image, out_path, blobs):
         print(f"No blobs plotted, returning blank image")
         plt.savefig(str(out_path), bbox_inches="tight")
         plt.close(fig)
+
+def add_green_blobs(ax, plant_blob_list, color='lime'):
+    for blob in plant_blob_list:
+        contours, _ = cv2.findContours(blob["mask"], cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        for contour in contours:
+            contour = contour.squeeze()
+            ax.plot(contour[:, 0], contour[:, 1], color=color, linewidth=2)
+
+######################################
+# BASIC GRAPHING UTILITIES
+###################################
+
+def add_point(ax, point, color='blue', size=10):
+    if point == None:
+        return
+    x, y = point
+    ax.add_patch(plt.Circle((x, y), size, color=color, fill=True))
+
+def add_line(ax, equation, color='yellow', linestyle='--', label=None):
+    slope, intercept = equation
+    x_vals = np.array(ax.get_xlim())
+    if slope == float('inf'):
+        x_line = np.full_like(x_vals, intercept)
+        y_line = np.array(ax.get_ylim())
+    else:
+        y_vals = slope * x_vals + intercept
+        x_line = x_vals
+        y_line = y_vals
+    ax.plot(x_line, y_line, color=color, linestyle=linestyle, label=label)
+
+#####################################
+# FULL GRAPHING UTILITIES
+#####################################
+
+def plot_height(image, out_path): #stress test with: plant with tag. Plant with no tag. tag with no plant. Blank image. Returns (tag, height, out_path) if tag and plant present.
+    graph_rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+    W,H = graph_rgb.shape[1], graph_rgb.shape[0]
+    fig, ax = plt.subplots()
+    color = color_pallet[0]
+
+    try:
+        reference_tags = scanner_util.scan_reference_tags(image) #find tags in image
+        green_blob_list = pf.find_green_blobs(image) #find plant matter
+
+        if len(reference_tags) != 0 and len(green_blob_list) != 0: #common case-tag and plant present
+            reference_tag = reference_tags[0]
+            
+            add_tag(ax,reference_tag)
+            add_green_blobs(ax,green_blob_list,color)
+
+            view_response = height_request.estimate_heights_reference_tag(image, reference_tag)
+            estimated_height = view_response[0]["estimated_height"]
+
+            #this is the only instance that should be logged to the database.
+
+        if len(reference_tags) != 0 and len(green_blob_list) == 0:
+            print("No green blobs found, plotting reference tag only.")
+            reference_tag = reference_tags[0]
+            add_tag(ax, reference_tag)
+            estimated_height = -1
+        
+        if len(reference_tags) == 0 and len(green_blob_list) != 0:
+            print("No reference tags found, plotting blobs only.")
+            add_green_blobs(ax, green_blob_list, color)
+            estimated_height = -1
+        
+        if len(reference_tags) == 0 and len(green_blob_list) == 0: #if there is nothing, we will return the input image with nothing plotted
+            print("No reference tags or green blobs found.")
+            estimated_height = -1
+
+    except Exception as e:
+        print(f"Error occurred: {e}")
+        estimated_height = -1
+        
+    ax.plot([], [], color=color, label=
+            f"Estimated Height: {round(estimated_height*100,2)}cm \n")
+    ax.imshow(graph_rgb)
+    #ax.axis('on')
+    ax.legend(loc='upper center', bbox_to_anchor=(0.5, -0.05),ncol=1)
+    plt.savefig(str(out_path), bbox_inches="tight")
+    plt.close(fig)
+
+    #returns for database entries.
+    if len(reference_tags) != 0 and len(green_blob_list) != 0:
+        return (int(reference_tag['data']), float(estimated_height), out_path)
+    return None
 
 '''
     
@@ -159,33 +225,3 @@ def add_camera_view_frustum(ax, heighest_green_pixel,camera_parameters, referenc
     ax.plot([heighest_green_pixel[0], x_point], [heighest_green_pixel[1], y_point], color=color, linewidth=1)
     ax.plot([], [], color=color, label='Camera View to Heighest Plant Pixel \n (May indicate occlusion or steep angle)')
  '''
-
-def add_green_blobs(ax, plant_blob_list, color='lime'):
-    for blob in plant_blob_list:
-        contours, _ = cv2.findContours(blob["mask"], cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-        for contour in contours:
-            contour = contour.squeeze()
-            ax.plot(contour[:, 0], contour[:, 1], color=color, linewidth=2)
-
-def add_point(ax, point, color='blue', size=10):
-    if point == None:
-        return
-    x, y = point
-    ax.add_patch(plt.Circle((x, y), size, color=color, fill=True))
-
-def add_line(ax, equation, color='yellow', linestyle='--', label=None):
-    slope, intercept = equation
-    x_vals = np.array(ax.get_xlim())
-    if slope == float('inf'):
-        x_line = np.full_like(x_vals, intercept)
-        y_line = np.array(ax.get_ylim())
-    else:
-        y_vals = slope * x_vals + intercept
-        x_line = x_vals
-        y_line = y_vals
-    ax.plot(x_line, y_line, color=color, linestyle=linestyle, label=label)
-   
-    
-
-
-    

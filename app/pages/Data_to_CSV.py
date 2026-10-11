@@ -6,13 +6,9 @@ import importlib
 
 sys.path.append("/mnt/db/agcam")
 
-db = importlib.import_module("database.database")
+db = importlib.import_module("utils.database_util")
 
-try:
-    conn = db.open_connection_to_database() 
-    print("Successfully opened connection to database")
-except Exception as e:
-    st.error(f"Failed to open connection to database: {e}")
+conn = db.open_connection_to_database()
 
 with open("app/styles.css") as f:
     st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
@@ -22,14 +18,12 @@ st.set_page_config(layout="wide")
 st.title("Data to CSV")
 
 #this section of code allows the user to specify a cam id and get database entries for it.
-x = st.selectbox('Select a cam id', options=['cam0', 'cam1', 'cam2'])
+x = st.selectbox('Select a table', options=['heights', 'imgIndex'])
 if st.button("Request CSV"):
     with st.spinner("Generating CSV..."):
         CSVfile_path = f"/mnt/db/agcam/app/pages/csv_out.csv"
-        tablename = "imgIndex" #change later.
-        #need to fix query because it does LookupError: Database error: could not open file "/mnt/db/agcam/app/pages/csv_out.csv" for writing: Permission denied HINT:  COPY TO instructs the PostgreSQL server process to write a file. You may want a client-side facility such as psql's \copy.
-        query = f"COPY {tablename} TO STDIN CSV HEADER;"
-        db.query_to_CSV(query, CSVfile_path, conn)
+        tablename = x
+        db.table_to_CSV(tablename, CSVfile_path, conn)
         st.success(f"CSV generated at {CSVfile_path}")
         with open(CSVfile_path) as f:
             st.download_button('Download CSV', f)

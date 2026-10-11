@@ -29,6 +29,14 @@ CREATE TABLE imgIndex (
   file_path TEXT NOT NULL UNIQUE
 );
 
+CREATE TABLE heights (
+  cam_id INTEGER NOT NULL,
+  time_stamp BIGINT NOT NULL,
+  tag INTEGER NOT NULL,
+  height NUMERIC NOT NULL,
+  file_path TEXT NOT NULL UNIQUE
+);
+
 -- =========================
 -- 3.5) Functions and Triggers
 -- =========================
