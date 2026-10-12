@@ -5,10 +5,13 @@ import warnings
 import numpy as np
 import matplotlib.patches as patches
 import importlib
+import sys
+
+sys.path.append('/mnt/db/agcam')
 
 from matplotlib.lines import Line2D
-from utils.line_util import get_equation_of_line, get_vertical_line, fractional_height_between_lines, get_intercept_of_lines
 
+line_util = importlib.import_module("utils.line_util")
 scanner_util = importlib.import_module("utils.reference_tag_util")
 pf = importlib.import_module("utils.plant_finder_util")
 height_request = importlib.import_module("processing.height_request")
@@ -37,7 +40,7 @@ def add_tag(ax, tag, color='cyan', center_size=20):
     ax.text(tr[0], tr[1], "TR", fontsize=8, ha='center', va='center')
     ax.text(br[0], br[1], "BR", fontsize=8, ha='center', va='center')
     ax.text(bl[0], bl[1], "BL", fontsize=8, ha='center', va='center')
-    ax.plot([], [], color=color, label=f'Tag ID: {tag["data"]}')
+    #ax.plot([], [], color=color, label=f'Tag ID: {tag["data"]}')
 
 def plot_reference_tag(image,out_path, reference_tag):
     graph_rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
@@ -110,12 +113,15 @@ def add_line(ax, equation, color='yellow', linestyle='--', label=None):
 # FULL GRAPHING UTILITIES
 #####################################
 
-def plot_height(image, out_path): #stress test with: plant with tag. Plant with no tag. tag with no plant. Blank image. Returns (tag, height, out_path) if tag and plant present.
+def plot_height(image, out_path):
+    #graph setup.
     graph_rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
     W,H = graph_rgb.shape[1], graph_rgb.shape[0]
-    fig, ax = plt.subplots()
+    fig = plt.figure(figsize=(8, 8))
+    ax = fig.add_axes([0, 0, 1, 1])
     color = color_pallet[0]
 
+    #graph add details.
     try:
         reference_tags = scanner_util.scan_reference_tags(image) #find tags in image
         green_blob_list = pf.find_green_blobs(image) #find plant matter
@@ -150,12 +156,18 @@ def plot_height(image, out_path): #stress test with: plant with tag. Plant with 
         print(f"Error occurred: {e}")
         estimated_height = -1
         
-    ax.plot([], [], color=color, label=
-            f"Estimated Height: {round(estimated_height*100,2)}cm \n")
+        #graph styling and output
+    plt.axis('off')
+    props = dict(boxstyle='round', facecolor='white', alpha=0.75)
+    ax.text(0.05, 0.95, f"Estimated Height: {round(estimated_height*100,2)}cm", transform=ax.transAxes, fontsize=14, verticalalignment='top', bbox =props)
+
+    #ax.plot([], [], color=color, label=
+     #       f"Estimated Height: {round(estimated_height*100,2)}cm \n")
     ax.imshow(graph_rgb)
     #ax.axis('on')
-    ax.legend(loc='upper center', bbox_to_anchor=(0.5, -0.05),ncol=1)
-    plt.savefig(str(out_path), bbox_inches="tight")
+    #ax.legend(loc='upper center', bbox_to_anchor=(0.5, -0.05),ncol=1)
+    
+    plt.savefig(str(out_path), bbox_inches="tight", pad_inches=0)
     plt.close(fig)
 
     #returns for database entries.
@@ -218,7 +230,7 @@ def add_camera_view_frustum(ax, heighest_green_pixel,camera_parameters, referenc
     point_x_camera = (displacement_z * (fx / displacement_z)) + (width / 2) - difference_x
     point_y_camera = height/2
 
-    m, b = get_equation_of_line(heighest_green_pixel, (point_x_camera, point_y_camera))
+    m, b = line_util.get_equation_of_line(heighest_green_pixel, (point_x_camera, point_y_camera))
     y_point = m * width + b 
     x_point = width - 1
 
