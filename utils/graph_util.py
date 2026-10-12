@@ -117,8 +117,10 @@ def plot_height(image, out_path):
     #graph setup.
     graph_rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
     W,H = graph_rgb.shape[1], graph_rgb.shape[0]
-    fig = plt.figure(figsize=(8, 8))
+
+    fig = plt.figure(figsize=(W/500,H/500))
     ax = fig.add_axes([0, 0, 1, 1])
+
     color = color_pallet[0]
 
     #graph add details.
@@ -133,7 +135,7 @@ def plot_height(image, out_path):
             add_green_blobs(ax,green_blob_list,color)
 
             view_response = height_request.estimate_heights_reference_tag(image, reference_tag)
-            estimated_height = view_response[0]["estimated_height"]
+            estimated_height = float(view_response[0]["estimated_height"])
 
             #this is the only instance that should be logged to the database.
 
@@ -141,25 +143,26 @@ def plot_height(image, out_path):
             print("No green blobs found, plotting reference tag only.")
             reference_tag = reference_tags[0]
             add_tag(ax, reference_tag)
-            estimated_height = -1
+            estimated_height = None
         
         if len(reference_tags) == 0 and len(green_blob_list) != 0:
             print("No reference tags found, plotting blobs only.")
             add_green_blobs(ax, green_blob_list, color)
-            estimated_height = -1
+            estimated_height = None
         
         if len(reference_tags) == 0 and len(green_blob_list) == 0: #if there is nothing, we will return the input image with nothing plotted
             print("No reference tags or green blobs found.")
-            estimated_height = -1
+            estimated_height = None
 
     except Exception as e:
         print(f"Error occurred: {e}")
-        estimated_height = -1
+        estimated_height = None
         
         #graph styling and output
     plt.axis('off')
     props = dict(boxstyle='round', facecolor='white', alpha=0.75)
-    ax.text(0.05, 0.95, f"Estimated Height: {round(estimated_height*100,2)}cm", transform=ax.transAxes, fontsize=14, verticalalignment='top', bbox =props)
+    if estimated_height is not None:
+        ax.text(0.05, 0.95, f"Estimated Height: {round(estimated_height*100,1)}cm", transform=ax.transAxes, fontsize=14, verticalalignment='top', bbox =props)
 
     #ax.plot([], [], color=color, label=
      #       f"Estimated Height: {round(estimated_height*100,2)}cm \n")
@@ -237,3 +240,6 @@ def add_camera_view_frustum(ax, heighest_green_pixel,camera_parameters, referenc
     ax.plot([heighest_green_pixel[0], x_point], [heighest_green_pixel[1], y_point], color=color, linewidth=1)
     ax.plot([], [], color=color, label='Camera View to Heighest Plant Pixel \n (May indicate occlusion or steep angle)')
  '''
+
+'''image = cv2.imread("tests/testimages/ID1234_20260929T160013Z.jpg") 
+plot_height(image, "tests/testimages/ID1234_20260929T160013Z_graphheight_out.jpg")'''
