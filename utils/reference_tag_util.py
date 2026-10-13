@@ -32,9 +32,11 @@ def scan_reference_tags(image, current_only=False):
     
     if (len(reference_tags)==0):
         if (len(results)!=0):
-            raise ValueError(f"No Valid reference tag has been detected, but a non valid one has been found")
+            print(f"\033[93mWarning: No Valid reference tag has been detected, but a non valid one has been found, processing with no tags\033[00m")
+            reference_tags = [] #set to empty list so that processing may continue.
+            results = []
         else:
-            print(f"Warning: No reference tags have been found")
+            print(f"\033[93mWarning: No reference tags have been found\033[00m")
   
     return reference_tags
 

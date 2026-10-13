@@ -31,8 +31,8 @@ CREATE TABLE imgIndex (
 
 CREATE TABLE heights (
   cam_id INTEGER NOT NULL,
-  time_stamp BIGINT NOT NULL,
-  tag INTEGER NOT NULL,
+  time_stamp TIMESTAMP NOT NULL,
+  tag INTEGER,
   height NUMERIC,
   file_path TEXT NOT NULL UNIQUE
 );

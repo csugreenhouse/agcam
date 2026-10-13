@@ -25,10 +25,10 @@ def open_connection_to_database():
             user=secrets["PG_USER"],
             password=secrets["PG_PASSWORD"]
         )
-        print("Successfully opened connection to database")
+        print("\033[92mSuccessfully opened connection to database\033[00m")
         return conn
     except Exception as e:
-        print(f"Database connection error: {e}")
+        print(f"\033[91mDatabase connection error: {e}\033[00m")
         return None
         conn.close() 
     
@@ -49,7 +49,7 @@ def execute_query(conn,query,params=None):
         return results
     except Exception as e:
         conn.rollback()
-        raise LookupError(f"Database error: {e}")
+        raise LookupError(f"\033[91mDatabase error while executing query: {e}\033[00m")
     finally:
         pass
 
@@ -65,7 +65,7 @@ def append_photo_to_imgIndex(conn, cam_id, file_path): #need to generalize to be
     try:
         execute_query(conn, query, (cam_id, file_path))
     except Exception as e:
-        print(f"Error appending photo to imgIndex: {e}")
+        print(f"\033[91mError appending photo to imgIndex: {e}\033[00m")
 
 def log_height(conn, cam_id, time_stamp, tag, height, file_path):
     query = (
@@ -75,7 +75,7 @@ def log_height(conn, cam_id, time_stamp, tag, height, file_path):
     try:
         execute_query(conn, query, (cam_id, time_stamp, tag, height, file_path))
     except Exception as e:
-        print(f"Error logging height: {e}")
+        print(f"\033[91mError logging height: {e}\033[00m")
 
 ####################################################
 # Functions that are used to output database tables.
@@ -90,7 +90,7 @@ def table_to_CSV(tablename, CSVfile_path, conn): #very useful for exporting tabl
         return f"CSV written at {CSVfile_path}"
     except Exception as e:
         conn.rollback()
-        raise LookupError(f"Database error: {e}")
+        raise LookupError(f"\033[91mDatabase error while exporting table to CSV: {e}\033[00m")
     finally:
         pass
 
@@ -107,14 +107,16 @@ def print_table_in_terminal(conn, table_name): #useful for debug
         df = return_table_as_dataframe(conn, table_name)
         print(df.to_markdown())
     except Exception as e:
-        print(f"Error printing table in terminal: {e}")
+        print(f"\033[91mError printing table in terminal: {e}\033[00m")
 
-def return_table_as_dataframe(conn, table_name, where_option=None): #useful for printing in streamlit app
+def return_table_as_dataframe(conn, table_name, where_option=None, order_by=None): #useful for printing in streamlit app
     query = f"SELECT * FROM {table_name}"
     if where_option:
         query += f" WHERE {where_option}"
+    if order_by:
+        query += f" ORDER BY {order_by}"
     try:
         df = pd.read_sql(query, conn)
         return df
     except Exception as e:
-        raise LookupError(f"Database error: {e}")
+        raise LookupError(f"\033[91mDatabase error while returning table as dataframe: {e}\033[00m")

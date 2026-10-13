@@ -130,32 +130,31 @@ def plot_height(image, out_path):
 
         if len(reference_tags) != 0 and len(green_blob_list) != 0: #common case-tag and plant present
             reference_tag = reference_tags[0]
-            
+            tag_id = int(reference_tag['data'])
             add_tag(ax,reference_tag)
             add_green_blobs(ax,green_blob_list,color)
 
             view_response = height_request.estimate_heights_reference_tag(image, reference_tag)
             estimated_height = float(view_response[0]["estimated_height"])
 
-            #this is the only instance that should be logged to the database.
-
         if len(reference_tags) != 0 and len(green_blob_list) == 0:
-            print("No green blobs found, plotting reference tag only.")
             reference_tag = reference_tags[0]
+            tag_id = int(reference_tag['data'])
             add_tag(ax, reference_tag)
             estimated_height = None
         
         if len(reference_tags) == 0 and len(green_blob_list) != 0:
-            print("No reference tags found, plotting blobs only.")
+            tag_id = None
             add_green_blobs(ax, green_blob_list, color)
             estimated_height = None
         
         if len(reference_tags) == 0 and len(green_blob_list) == 0: #if there is nothing, we will return the input image with nothing plotted
-            print("No reference tags or green blobs found.")
+            tag_id = None
             estimated_height = None
 
     except Exception as e:
-        print(f"Error occurred: {e}")
+        print(f"\033[91mError occurred while plotting height: {e}\033[00m")
+        tag_id = None
         estimated_height = None
         
         #graph styling and output
@@ -174,9 +173,7 @@ def plot_height(image, out_path):
     plt.close(fig)
 
     #returns for database entries.
-    if len(reference_tags) != 0 and len(green_blob_list) != 0:
-        return (int(reference_tag['data']), float(estimated_height), out_path)
-    return None
+    return (tag_id, estimated_height, out_path)
 
 '''
     

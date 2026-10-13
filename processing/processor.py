@@ -61,7 +61,7 @@ def make_blobs_for_all_imgs_in_folder(folder_path):
                     cam_number = int(cam_name[0])
                     process_and_make_copies_blob_visuals(file_path, cam_name)
 
-def process_and_make_copies_height_visuals(file_path,cam_name):
+def process_and_make_copies_height_visuals(file_path,cam_name,bulk_delay_s, conn):
     print (f"Processing height visuals for file: {file_path} and camera: {cam_name}")
     #section 1: Prepare directories for processed and archived images
     processed_folder_path = f"/mnt/image/images-processed/{cam_name}/"
@@ -77,32 +77,38 @@ def process_and_make_copies_height_visuals(file_path,cam_name):
     if img is None:
         raise FileNotFoundError(f"Src path missing {file_path}.")
 
+    time.sleep(bulk_delay_s)
+
     plastic_color_bounds = ((31, 50, 50), (75, 255, 200))
 
     #step 2: process & check for successful processing
 
     response = gu.plot_height(img, out_path)
 
+    time.sleep(bulk_delay_s*2) #extra delay for graphing
+
     cam_number = int(cam_name[0])
 
     # step 3: log the estimated height to the database if available
-    if response is not None:
-        conn = db.open_connection_to_database()
-        #GET int timestamp from file path, of the form .../ID1234_20260817T160013Z.jpg
-        timestamp = int(file_path.rsplit("/",1)[-1].split("_")[1].split(".")[0].replace("T","").replace("Z",""))
-        #return from response is : return (reference_tag_number, float(estimated_height), out_path)
-        db.log_height(conn, cam_number, timestamp, response[0], response[1], response[2])
+    #GET int timestamp from file path, of the form .../ID1234_20260817T160013Z.jpg
+    section = file_path.rsplit("_",1)[-1].split("Z")[0] #outputs 20260817T160013
+    timestamp = f"{section[0:4]}-{section[4:6]}-{section[6:8]} {section[9:11]}:{section[11:13]}:{section[13:]}"
+    
+    #return from response is : return (reference_tag_number, float(estimated_height), out_path)
+    db.log_height(conn, cam_number, timestamp, response[0], response[1], response[2])
+
+    time.sleep(bulk_delay_s)
    
     archived_file_path = archived_folder_path + image_name
     os.rename(file_path, archived_file_path)
 
     print("\033[32m" + f"Processed and saved height visuals to {out_path}" + "\033[0m")
 
-    #manual delay to stop processor from choking
+    time.sleep(bulk_delay_s)
 
-    time.sleep(5)
-
-def make_height_visuals_for_all_imgs_in_folder(folder_path):
+def make_height_visuals_for_all_imgs_in_folder(folder_path, bulk_delay_s):
+    conn = db.open_connection_to_database()
+    time.sleep(bulk_delay_s)
     for folder in os.listdir(folder_path):
         folder_full_path = os.path.join(folder_path, folder)
         if os.path.isdir(folder_full_path):
@@ -111,14 +117,13 @@ def make_height_visuals_for_all_imgs_in_folder(folder_path):
                     file_path = os.path.join(folder_full_path, file_name)
                     cam_name=str(folder)
                     cam_number = int(cam_name[0])
-                    process_and_make_copies_height_visuals(file_path, cam_name)
+                    process_and_make_copies_height_visuals(file_path, cam_name, bulk_delay_s, conn)
                     
 
-#note, because I ran bulk processing while still troubleshooting, the processed images have errors. once plant detect is good, we will have to rerun. also processor could use more error handling so it doesnt stop mid process for certain errors. (invalid ref tag, etc)
-def process_and_stop_after():
-    print("Agcam Processing Activated")
+#if you are processing lots of files, increase bulk delay to prevent choking.
+def process_files(folder_path="/mnt/image/image-inbox", bulk_delay_s=0.1):
     try:
-        make_height_visuals_for_all_imgs_in_folder("/mnt/image/image-inbox") #this is the current runtime script that will process and copy photos for now.
+        make_height_visuals_for_all_imgs_in_folder(folder_path, bulk_delay_s) #this is the current runtime script that will process and copy photos for now.
     except Exception as e:
         print(e)
         print(f"\033[91mError\033[0m")
