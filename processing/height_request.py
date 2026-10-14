@@ -8,17 +8,17 @@ import psycopg2
 import sys
 sys.path.append('/mnt/db/agcam')
 import numpy as np
+
 import utils.reference_tag_util as reference_tag_util
 import utils.database_util as database_util
 import utils.line_util as line_util
 import utils.image_util as image_util
 import utils.reference_tag_util as reference_util
-import utils.plant_finder_util as plant_finder_util
+import plant_finders.legacyHSV_plant_finder as plant_finder
 
 GREEN_BOUNDS = ((31, 50, 50), (75, 255, 200))
 
 def get_heighest_green_pixel(image, plant_bounds, minimum_area_pixels):
-    raw_mask = plant_finder_util.find_green_blobs(image, minimum_area_pixels=minimum_area_pixels)
     
     W,H = image.shape[1], image.shape[0]
     # ignore x outside of plant_bounds
@@ -31,10 +31,8 @@ def get_heighest_green_pixel(image, plant_bounds, minimum_area_pixels):
         mask[y_min:y_max, x_min:x_max] = 255
         image = cv2.bitwise_and(image, image, mask=mask)
     
-    green_blobs = plant_finder_util.find_plants(image)
-    mask_result = plant_finder_util.find_plants(image, anchor_area_fraction=0.75, anchor_max_proximity_px=25)
+    mask = plant_finder.find_plants(image, anchor_area_fraction=0.75, anchor_max_proximity_px=25)
     
-    mask = mask_result["filtered_mask"]
     heighest_pixel = None
     
     for pixel in np.argwhere(mask > 0):
@@ -44,7 +42,7 @@ def get_heighest_green_pixel(image, plant_bounds, minimum_area_pixels):
             
     graph_info = {
         "heighest_green_pixel": heighest_pixel,
-        "green_blob_list": mask_result["kept_blobs"],
+        "green_blob_list": mask,
         "plant_bounds": plant_bounds
     }
     

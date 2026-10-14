@@ -1,0 +1,36 @@
+Going forward, there will be multiple modules for plant detection, with different internal processes.
+
+Each module must be named and placed as follows: plant_finders/<descriptiveWords>_plant_finder.py
+Each module is expected to have the main method find_plants function that returns a mask of the detected plant matter alone.
+As inputs to the main module, you may take in an image. Do not take in any other parameters, as the modules should be able to be switched out 1:1.
+    eg. plant_finders/legacyHsv_plant_finder.py
+    main method: find_plants(image)
+
+Any stages in a pipeline that are necessary for the module should be implemented as functions for modularity and readibility.
+The code should be organized with the main function first and helper functions after.
+Functions that are used in multiple modules should be duplicated in each module to make deletion easier, unless they are so general to openCv, image processing, etc that they belong in a respective util.
+
+As it is a principle part of the code, every plant detection module must include the following header comment.
+
+"""
+Copyright         : <Year> <Copyright Owner>
+File Name         : <Filename>
+Description       : <Write your file description here>
+                   
+Revision History  :
+Date		Author 			Comments
+------------------------------------------------------------------
+07/11/2014	<Person working on the file>	<Short change description>
+"""
+
+There should also be internal comments for each function in the following format, within and immediately following the def.
+
+"""
+<function description>
+
+Args:
+    <name>: <description>
+
+Returns:
+    <description>
+"""
