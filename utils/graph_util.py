@@ -13,7 +13,7 @@ from matplotlib.lines import Line2D
 
 line_util = importlib.import_module("utils.line_util")
 scanner_util = importlib.import_module("utils.reference_tag_util")
-pf = importlib.import_module("utils.plant_finder_util")
+plant_finder = importlib.import_module("plant_finders.legacyHSV_plant_finder")
 height_request = importlib.import_module("processing.height_request")
 
 color_pallet = ['cyan', 'yellow', 'magenta', 'orange', 'pink', 'lime', 'aqua']
@@ -76,7 +76,7 @@ def plot_blobs(image, out_path, blobs):
         plt.savefig(str(out_path), bbox_inches="tight")
         plt.close(fig)
     except Exception as e:
-        print(f"No blobs plotted, returning blank image")
+        print(f"No blobs plotted, returning blank image. Exception: {e}")
         plt.savefig(str(out_path), bbox_inches="tight")
         plt.close(fig)
 
@@ -86,6 +86,24 @@ def add_green_blobs(ax, plant_blob_list, color='lime'):
         for contour in contours:
             contour = contour.squeeze()
             ax.plot(contour[:, 0], contour[:, 1], color=color, linewidth=2)
+
+
+#DO NOT USE INCOMPLETE> DO NOT EDIT FOR MERGE CONFLICTS..
+def plot_mask(image, mask, out_path):
+    graph_rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+    W,H = graph_rgb.shape[1], graph_rgb.shape[0]
+    fig, ax = plt.subplots()
+    ax.imshow(graph_rgb)
+    ax.axis('on')
+
+    color = 'cyan'
+
+    try:
+        return
+    except Exception as e:
+        print(f"Error occurred while plotting mask: {e}")
+        plt.savefig(str(out_path), bbox_inches="tight")
+        plt.close(fig)
 
 ######################################
 # BASIC GRAPHING UTILITIES
@@ -126,29 +144,29 @@ def plot_height(image, out_path):
     #graph add details.
     try:
         reference_tags = scanner_util.scan_reference_tags(image) #find tags in image
-        green_blob_list = pf.find_green_blobs(image) #find plant matter
+        result = plant_finder.find_plants(image) #find plant matter
 
-        if len(reference_tags) != 0 and len(green_blob_list) != 0: #common case-tag and plant present
+        if len(reference_tags) != 0 and len(result) != 0: #common case-tag and plant present
             reference_tag = reference_tags[0]
             tag_id = int(reference_tag['data'])
             add_tag(ax,reference_tag)
-            add_green_blobs(ax,green_blob_list,color)
+            add_green_blobs(ax,result,color)
 
             view_response = height_request.estimate_heights_reference_tag(image, reference_tag)
             estimated_height = float(view_response[0]["estimated_height"])
 
-        if len(reference_tags) != 0 and len(green_blob_list) == 0:
+        if len(reference_tags) != 0 and len(result) == 0:
             reference_tag = reference_tags[0]
             tag_id = int(reference_tag['data'])
             add_tag(ax, reference_tag)
             estimated_height = None
         
-        if len(reference_tags) == 0 and len(green_blob_list) != 0:
+        if len(reference_tags) == 0 and len(result) != 0:
             tag_id = None
-            add_green_blobs(ax, green_blob_list, color)
+            add_green_blobs(ax, result, color)
             estimated_height = None
         
-        if len(reference_tags) == 0 and len(green_blob_list) == 0: #if there is nothing, we will return the input image with nothing plotted
+        if len(reference_tags) == 0 and len(result) == 0: #if there is nothing, we will return the input image with nothing plotted
             tag_id = None
             estimated_height = None
 
