@@ -21,7 +21,7 @@ GREEN_LOWER  = np.array([ 31, 50, 50], dtype="uint8")
 GREEN_UPPER  = np.array([ 75, 255, 220], dtype="uint8")
 GREEN_BOUNDS = (GREEN_LOWER, GREEN_UPPER)
 
-def find_plants(image):
+def find_plants(image, color_bounds=GREEN_BOUNDS):
     """
     fully assembled pipeline method for plant detection
     0: bring in original image 1: find green blobs, 2: remove blobs with odd aspect ratio & discard blobs far from the largest anchor or too small, 3: grow regions from seed mask (final output)
@@ -33,7 +33,6 @@ def find_plants(image):
         grown_mask: OpenCV mask of detected plants
     """
 
-    color_bounds=GREEN_BOUNDS
     color_tolerance=22
     anchor_area_fraction=0.75
     anchor_max_proximity_px=25
@@ -70,7 +69,7 @@ def find_plants(image):
     print(f"Seed Mask area: {cv2.countNonZero(seed_mask)}")
 
     grown_mask    = region_grow(image, seed_mask, color_tolerance=color_tolerance)  #pipeline stage 4: grow regions from seed mask
-    print(f"Grown Mask area: {grown_mask.contourArea()}")
+    print(f"Grown Mask area: {cv2.countNonZero(grown_mask)}")
 
     output_dict = {
         "plant_blob_list": plant_blob_list,
@@ -129,7 +128,7 @@ def find_green_blobs(image,
     plant_blob_list = []
     for label in range(1, numb_labels):
         area = stats[label, cv2.CC_STAT_AREA]
-        if minimum_area_pixels <= area <= maximum_area_pixels:
+        if minimum_area_pixels <= area: #<= maximum_area_pixels:
             plant_blob_list.append({
                 "label":    label,
                 "centroid": (float(centroids[label][0]), float(centroids[label][1])),
@@ -298,3 +297,91 @@ def region_grow(image, seed_mask, color_tolerance=22):
     k = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (11, 11))
     grown_mask = cv2.morphologyEx(grown_mask, cv2.MORPH_CLOSE, k)
     return grown_mask
+
+"""def test_blobber(src_path):
+    src_path = Path(src_path)
+    dst_path = Path(str(src_path).replace(".jpg", "_blobber_out.jpg"))
+
+    img = cv2.imread(str(src_path))
+    if img is None:
+        raise FileNotFoundError(f"Src path missing {src_path}.")
+
+    blob_list = plant_finder.find_green_blobs(img)
+    assert len(blob_list) != 0, "No blobs found"
+    graph_util.plot_blobs(img, dst_path, blob_list)
+    print(f"blob test saved to: {dst_path}")"""
+
+def test_pipeline_on_image(src_path):
+    src_path = Path(src_path)
+    dst_path = Path(str(src_path).replace(".jpg", "_pipeline_out.jpg"))
+
+    img = cv2.imread(str(src_path))
+
+    if img is None:
+        raise FileNotFoundError(f"Missing {src_path}.")
+
+    img_rgb   = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+
+    result = plant_finder.find_plants(img)
+
+    # END PIPELINE, MAKE DISPLAYS #
+
+    """#display pipeline functionality by stage (commented out because this one is not useable with the refactored plantfinders. if you want tests like this, you have to define them in your plantfinder.)
+    fig, axes = plt.subplots(1, 4, figsize=(25, 6))
+    fig.suptitle(f"Plant Pipeline Stage Outputs")
+
+    axes[0].imshow(img_rgb)
+    axes[0].set_title("Original Image")
+    axes[0].axis("off")
+
+    blob_overlay = img_rgb.copy()
+    blob_overlay[result == 255] = (
+        blob_overlay[result == 255] * 0.5 + np.array([0, 0, 200]) * 0.5
+    ).astype("uint8")
+    axes[1].imshow(blob_overlay)
+    axes[1].set_title("Blob Detection")
+    axes[1].axis("off")
+
+    discard_overlay = img_rgb.copy()
+    discard_overlay[result["discarded_blobs"] == 255] = (
+        discard_overlay[result["discarded_blobs"] == 255] * 0.5 + np.array([200, 0, 0]) * 0.5
+    ).astype("uint8")
+    axes[2].imshow(discard_overlay)
+    axes[2].set_title("Discarded Blobs")
+    axes[2].axis("off")
+
+    output_overlay = img_rgb.copy()
+    output_overlay[result["filtered_mask"] == 255] = (
+        output_overlay[result["filtered_mask"] == 255] * 0.5 + np.array([0, 0, 200]) * 0.5
+    ).astype("uint8")
+    axes[3].imshow(output_overlay)
+    axes[3].set_title("Region Grow (Final Plant Detection Output)")
+    axes[3].axis("off")
+
+    stage_path = str(src_path).replace(".jpg", "_pipeline_stages_out.jpg")
+    plt.tight_layout()
+    plt.savefig(stage_path, dpi=200, bbox_inches="tight")
+    plt.close(fig)
+    print(f"intermediate stages display saved to: {stage_path}")"""
+
+    #final simplified output image, shows original pic and final plant mask.
+    fig, axes = plt.subplots(1, 2, figsize=(14, 6))
+    fig.suptitle(f"{Path(src_path).name}  Plant Detection Results")
+
+    axes[0].imshow(img_rgb)
+    axes[0].set_title("Original")
+    axes[0].axis("off")
+
+    output_overlay = img_rgb.copy()
+    output_overlay[result == 255] = (
+        output_overlay[result == 255] * 0.5 + np.array([0, 0, 200]) * 0.5
+    ).astype("uint8")
+
+    axes[1].imshow(output_overlay)
+    axes[1].set_title("Plant Detection Overlay")
+    axes[1].axis("off")
+
+    plt.tight_layout()
+    plt.savefig(str(dst_path), dpi=150, bbox_inches="tight")
+    plt.close(fig)
+    print(f"final plant detection output saved to: {dst_path}")

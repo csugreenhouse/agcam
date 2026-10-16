@@ -6,6 +6,7 @@ import numpy as np
 import matplotlib.patches as patches
 import importlib
 import sys
+from pathlib import Path
 
 sys.path.append('/mnt/db/agcam')
 
@@ -15,6 +16,7 @@ line_util = importlib.import_module("utils.line_util")
 scanner_util = importlib.import_module("utils.reference_tag_util")
 plant_finder = importlib.import_module("plant_finders.legacyHSV_plant_finder")
 height_request = importlib.import_module("processing.height_request")
+openCV_util = importlib.import_module("utils.openCV_util")
 
 color_pallet = ['cyan', 'yellow', 'magenta', 'orange', 'pink', 'lime', 'aqua']
 
@@ -62,48 +64,45 @@ def plot_reference_tag(image,out_path, reference_tag):
 # GREEN BLOB GRAPHING UTILITIES
 #####################################
 
-def plot_blobs(image, out_path, blobs):
+def plot_contour_and_mask(src_path, contours, mask, show_mask = True):
+    print("plotting contour and mask")
+    src_path = Path(src_path)
+    out_path = Path(str(src_path).replace(".jpg", "_blobplot_out.jpg"))
+
+    #read image & get sizes
+    image = cv2.imread(str(src_path))    
     graph_rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
     W,H = graph_rgb.shape[1], graph_rgb.shape[0]
+
+    #setup graph with img bg
     fig, ax = plt.subplots()
     ax.imshow(graph_rgb)
     ax.axis('on')
-
-    color = color_pallet[1%len(color_pallet)]#choose color pallett
-
-    try:
-        add_green_blobs(ax,blobs,color)#draws green blobs around leaves
-        plt.savefig(str(out_path), bbox_inches="tight")
-        plt.close(fig)
-    except Exception as e:
-        print(f"No blobs plotted, returning blank image. Exception: {e}")
-        plt.savefig(str(out_path), bbox_inches="tight")
-        plt.close(fig)
-
-def add_green_blobs(ax, plant_blob_list, color='lime'):
-    for blob in plant_blob_list:
-        contours, _ = cv2.findContours(blob["mask"], cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-        for contour in contours:
-            contour = contour.squeeze()
-            ax.plot(contour[:, 0], contour[:, 1], color=color, linewidth=2)
-
-
-#DO NOT USE INCOMPLETE> DO NOT EDIT FOR MERGE CONFLICTS..
-def plot_mask(image, mask, out_path):
-    graph_rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-    W,H = graph_rgb.shape[1], graph_rgb.shape[0]
-    fig, ax = plt.subplots()
-    ax.imshow(graph_rgb)
-    ax.axis('on')
-
     color = 'cyan'
 
     try:
-        return
-    except Exception as e:
-        print(f"Error occurred while plotting mask: {e}")
+        if(show_mask):
+            add_mask_to_plot(ax,mask)
+        #add_contours_to_plot(ax,contours,color)
+        
         plt.savefig(str(out_path), bbox_inches="tight")
         plt.close(fig)
+        print(f"Contour and mask successfully plotted, saved to: {out_path}")
+    except Exception as e:
+        plt.savefig(str(out_path), bbox_inches="tight")
+        plt.close(fig)
+        print(f"No blobs plotted, returning blank image at {out_path}. Exception: {e}")
+
+def add_mask_to_plot(ax, mask, cmap='bwr'):
+    invertedmask = cv2.bitwise_not(mask)
+    ax.imshow(invertedmask, cmap = cmap, alpha = 0.25)
+
+#this method has a known error for parsing answer keys, however it is non fatal.
+# this method is not being used now in a way that breaks anything so it is not being fixed urgently
+def add_contours_to_plot(ax, contours, color='cyan'):
+    for contour in contours:
+        contour = contour.squeeze()
+        ax.plot(contour[:, 0], contour[:, 1], color=color, linewidth=2)
 
 ######################################
 # BASIC GRAPHING UTILITIES
@@ -146,11 +145,13 @@ def plot_height(image, out_path):
         reference_tags = scanner_util.scan_reference_tags(image) #find tags in image
         result = plant_finder.find_plants(image) #find plant matter
 
+        contours = openCV_util.get_contours_from_mask(result)
+
         if len(reference_tags) != 0 and len(result) != 0: #common case-tag and plant present
             reference_tag = reference_tags[0]
             tag_id = int(reference_tag['data'])
             add_tag(ax,reference_tag)
-            add_green_blobs(ax,result,color)
+            add_contours_to_plot(ax, contours, color)
 
             view_response = height_request.estimate_heights_reference_tag(image, reference_tag)
             estimated_height = float(view_response[0]["estimated_height"])
@@ -163,7 +164,7 @@ def plot_height(image, out_path):
         
         if len(reference_tags) == 0 and len(result) != 0:
             tag_id = None
-            add_green_blobs(ax, result, color)
+            add_contours_to_plot(ax, contours, color)
             estimated_height = None
         
         if len(reference_tags) == 0 and len(result) == 0: #if there is nothing, we will return the input image with nothing plotted
@@ -192,69 +193,3 @@ def plot_height(image, out_path):
 
     #returns for database entries.
     return (tag_id, estimated_height, out_path)
-
-'''
-    
-def plot_calculated_displacements_graph_info(image, out_path, reference_tag):
-    graph_rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-    W,H = graph_rgb.shape[1], graph_rgb.shape[0]
-    fig, ax = plt.subplots()
-    ax.imshow(graph_rgb)
-    ax.axis('on')
-
-    add_tag_displacement_relative_to_camera(ax, W, H, reference_tag)
-    
-    ax.legend(loc='upper center', bbox_to_anchor=(0.5, -0.05),ncol=2)
-    plt.savefig(str(out_path), bbox_inches="tight")
-    plt.close(fig)
-
-
-def add_tag_displacement_relative_to_camera(ax, W, H, reference_tag, color=None):
-    if color is None:
-        color = ['red', 'green', 'blue']
-    else:
-        color = [color]*3
-        
-    displacement_d = reference_tag['displacements']['d']
-    displacement_z = reference_tag['displacements']['z']
-    displacement_x = reference_tag['displacements']['x']
-    displacement_y = reference_tag['displacements']['y']
-    center_x_image = W / 2
-    center_y_image = H / 2
-    center_x_ref = reference_tag['center'][0]
-    center_y_ref = reference_tag['center'][1]
-
-    ax.plot([center_x_image, center_x_ref], [center_y_image, center_y_ref], color=color[0], linewidth=2)
-    ax.plot([center_x_image, center_x_ref], [center_y_ref, center_y_ref], color=color[1], linewidth=2)
-    ax.plot([center_x_ref, center_x_ref], [center_y_image, center_y_ref], color=color[2], linewidth=2)
-
-    ax.plot([], [], color=color[0], label='Depth Displacement(z)\n %.6f cm' % (displacement_z*100))
-    ax.plot([], [], color=color[1], label='Horizontal Displacement (x)\n %.6f cm' % (displacement_x*100))
-    ax.plot([], [], color=color[2], label='Vertical Displacement (y)\n %.6f cm' % (displacement_y*100))
-    ax.plot([], [], color='black', label='Distance to QR Code (d)\n %.6f cm' % (displacement_d*100))
-   
-    
-
-def add_camera_view_frustum(ax, heighest_green_pixel,camera_parameters, reference_tag, color='yellow'):
-    width = camera_parameters["width"]
-    height = camera_parameters["height"]
-    fx = (camera_parameters["focal_length_mm"] / camera_parameters["sensor_width_mm"]) * width
-    fy = (camera_parameters["focal_length_mm"] / camera_parameters["sensor_height_mm"]) * height
-    displacement_z = reference_tag['displacements']['z']
-    displacement_x = reference_tag['displacements']['x']
-    displacement_y = reference_tag['displacements']['y']
-    # find the difference between the x cordinate of the tallest pixel and the x cordinate of the center of the reference tag
-    difference_x = reference_tag['center'][0] - heighest_green_pixel[0]
-    point_x_camera = (displacement_z * (fx / displacement_z)) + (width / 2) - difference_x
-    point_y_camera = height/2
-
-    m, b = line_util.get_equation_of_line(heighest_green_pixel, (point_x_camera, point_y_camera))
-    y_point = m * width + b 
-    x_point = width - 1
-
-    ax.plot([heighest_green_pixel[0], x_point], [heighest_green_pixel[1], y_point], color=color, linewidth=1)
-    ax.plot([], [], color=color, label='Camera View to Heighest Plant Pixel \n (May indicate occlusion or steep angle)')
- '''
-
-'''image = cv2.imread("tests/testimages/ID1234_20260929T160013Z.jpg") 
-plot_height(image, "tests/testimages/ID1234_20260929T160013Z_graphheight_out.jpg")'''
