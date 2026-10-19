@@ -17,7 +17,7 @@ with open("app/styles.css") as f:
 
 if st.button('Run Processing'):
     with st.spinner("Processing in progress."):
-        processor.make_height_visuals_for_all_imgs_in_folder("/mnt/image/image-inbox")
+        processor.make_height_visuals_for_all_imgs_in_folder("/mnt/image/image-inbox", 5)
         success = st.empty()
         success.success("Processing completed.")
         time.sleep(2)

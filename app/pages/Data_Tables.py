@@ -21,6 +21,6 @@ st.title("Data Tables")
 x = st.selectbox('Select a table', options=['heights', 'imgIndex'])
 
 table_name = x
-dataframe = db.return_table_as_dataframe(conn, table_name, None, time_stamp)
+dataframe = db.return_table_as_dataframe(conn, table_name, None, "time_stamp")
 
 st.table(dataframe)
