@@ -111,9 +111,9 @@ def print_table_in_terminal(conn, table_name): #useful for debug
 
 def return_table_as_dataframe(conn, table_name, where_option=None, order_by=None): #useful for printing in streamlit app
     query = f"SELECT * FROM {table_name}"
-    if where_option:
+    if where_option is not None:
         query += f" WHERE {where_option}"
-    if order_by:
+    if order_by is not None:
         query += f" ORDER BY {order_by}"
     try:
         df = pd.read_sql(query, conn)

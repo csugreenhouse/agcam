@@ -15,4 +15,6 @@ __pycache__/
 *_output.png
 *_discarded.png
 
+ *.csv
+
 secrets_util.json
