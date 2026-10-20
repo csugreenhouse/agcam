@@ -22,7 +22,7 @@ def test_accuracy(test_src_path, key_path):
     answer_key_contours = openCV_util.get_contours_from_mask(answer_key_mask)
     graph_util.plot_contour_and_mask(key_path, answer_key_contours, answer_key_mask) #optional visual sanity check
 
-    test_mask = plant_finder.find_plants(cv2.imread(str(test_src_path)))
+    test_mask = plant_finder.find_plants(test_src_path)
     test_contours = openCV_util.get_contours_from_mask(test_mask)
     graph_util.plot_contour_and_mask(test_src_path, test_contours, test_mask) #optional visual sanity check
 
