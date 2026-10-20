@@ -21,7 +21,7 @@ GREEN_LOWER  = np.array([ 31, 50, 50], dtype="uint8")
 GREEN_UPPER  = np.array([ 75, 255, 220], dtype="uint8")
 GREEN_BOUNDS = (GREEN_LOWER, GREEN_UPPER)
 
-def find_plants(image, color_bounds=GREEN_BOUNDS):
+def find_plants(image_file_path, color_bounds=GREEN_BOUNDS):
     """
     fully assembled pipeline method for plant detection
     0: bring in original image 1: find green blobs, 2: remove blobs with odd aspect ratio & discard blobs far from the largest anchor or too small, 3: grow regions from seed mask (final output)
@@ -32,6 +32,8 @@ def find_plants(image, color_bounds=GREEN_BOUNDS):
     Returns:
         grown_mask: OpenCV mask of detected plants
     """
+
+    image = cv2.imread(str(image_file_path))
 
     color_tolerance=22
     anchor_area_fraction=0.75

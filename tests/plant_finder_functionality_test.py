@@ -23,7 +23,7 @@ def plant_finder_test_functionality(src_path):
     if img is None:
         raise FileNotFoundError(f"Missing {src_path}.")
     
-    mask = plant_finder.find_plants(img)
+    mask = plant_finder.find_plants(src_path)
     contours = openCV_util.get_contours_from_mask(mask)
 
     graph_util.plot_contour_and_mask(src_path, contours, mask)
