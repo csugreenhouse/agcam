@@ -15,6 +15,10 @@ __pycache__/
 *_output.png
 *_discarded.png
 
+build/*
+.DS_Store
+
  *.csv
+ apriltags/*
 
 secrets_util.json
