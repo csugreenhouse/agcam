@@ -20,6 +20,28 @@ openCV_util = importlib.import_module("utils.openCV_util")
 
 color_pallet = ['cyan', 'yellow', 'magenta', 'orange', 'pink', 'lime', 'aqua']
 
+######################################
+# BASIC GRAPHING UTILITIES
+###################################
+
+def add_point(ax, point, color='blue', size=10):
+    if point == None:
+        return
+    x, y = point
+    ax.add_patch(plt.Circle((x, y), size, color=color, fill=True))
+
+def add_line(ax, equation, color='yellow', linestyle='--', label=None):
+    slope, intercept = equation
+    x_vals = np.array(ax.get_xlim())
+    if slope == float('inf'):
+        x_line = np.full_like(x_vals, intercept)
+        y_line = np.array(ax.get_ylim())
+    else:
+        y_vals = slope * x_vals + intercept
+        x_line = x_vals
+        y_line = y_vals
+    ax.plot(x_line, y_line, color=color, linestyle=linestyle, label=label)
+
 #####################################
 # REFERENCE TAG GRAPHING UTILITIES
 #####################################
@@ -61,7 +83,7 @@ def plot_reference_tag(image,out_path, reference_tag):
     plt.close(fig)
 
 #####################################
-# GREEN BLOB GRAPHING UTILITIES
+# BLOB (PLANT) GRAPHING UTILITIES
 #####################################
 
 def plot_contour_and_mask(src_path, contours, mask, show_mask = True):
@@ -94,8 +116,7 @@ def plot_contour_and_mask(src_path, contours, mask, show_mask = True):
         print(f"No blobs plotted, returning blank image at {out_path}. Exception: {e}")
 
 def add_mask_to_plot(ax, mask, cmap='bwr'):
-    invertedmask = cv2.bitwise_not(mask)
-    ax.imshow(invertedmask, cmap = cmap, alpha = 0.25)
+    ax.imshow(mask, cmap = cmap, alpha = 0.25)
 
 #this method has a known error for parsing answer keys, however it is non fatal.
 # this method is not being used now in a way that breaks anything so it is not being fixed urgently
@@ -104,79 +125,49 @@ def add_contours_to_plot(ax, contours, color='cyan'):
         contour = contour.squeeze()
         ax.plot(contour[:, 0], contour[:, 1], color=color, linewidth=2)
 
-######################################
-# BASIC GRAPHING UTILITIES
-###################################
-
-def add_point(ax, point, color='blue', size=10):
-    if point == None:
-        return
-    x, y = point
-    ax.add_patch(plt.Circle((x, y), size, color=color, fill=True))
-
-def add_line(ax, equation, color='yellow', linestyle='--', label=None):
-    slope, intercept = equation
-    x_vals = np.array(ax.get_xlim())
-    if slope == float('inf'):
-        x_line = np.full_like(x_vals, intercept)
-        y_line = np.array(ax.get_ylim())
-    else:
-        y_vals = slope * x_vals + intercept
-        x_line = x_vals
-        y_line = y_vals
-    ax.plot(x_line, y_line, color=color, linestyle=linestyle, label=label)
-
 #####################################
 # FULL GRAPHING UTILITIES
 #####################################
 
-def plot_height(image, out_path):
+def plot_height(image_path, out_path):
     #graph setup.
+    image = cv2.imread(str(image_path))
     graph_rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
     W,H = graph_rgb.shape[1], graph_rgb.shape[0]
 
     fig = plt.figure(figsize=(W/500,H/500))
     ax = fig.add_axes([0, 0, 1, 1])
 
+    ax.imshow(graph_rgb)
+
     color = color_pallet[0]
 
-    #graph add details.
     try:
         reference_tags = scanner_util.scan_reference_tags(image) #find tags in image
-        result = plant_finder.find_plants(image) #find plant matter
+        result = plant_finder.find_plants(image_path) #find plant matter
 
-        contours = openCV_util.get_contours_from_mask(result)
+        tag_id = None
+        estimated_height = None
 
-        if len(reference_tags) != 0 and len(result) != 0: #common case-tag and plant present
+        #plot tags or not.
+        if len(reference_tags) != 0: #tag present
             reference_tag = reference_tags[0]
             tag_id = int(reference_tag['data'])
             add_tag(ax,reference_tag)
-            add_contours_to_plot(ax, contours, color)
 
-            view_response = height_request.estimate_heights_reference_tag(image, reference_tag)
+        if len(reference_tags) != 0 and cv2.countNonZero(result) != 0:
+            view_response = height_request.estimate_heights_reference_tag(image_path, result, reference_tag)
             estimated_height = float(view_response[0]["estimated_height"])
 
-        if len(reference_tags) != 0 and len(result) == 0:
-            reference_tag = reference_tags[0]
-            tag_id = int(reference_tag['data'])
-            add_tag(ax, reference_tag)
-            estimated_height = None
-        
-        if len(reference_tags) == 0 and len(result) != 0:
-            tag_id = None
-            add_contours_to_plot(ax, contours, color)
-            estimated_height = None
-        
-        if len(reference_tags) == 0 and len(result) == 0: #if there is nothing, we will return the input image with nothing plotted
-            tag_id = None
-            estimated_height = None
+        if cv2.countNonZero(result) != 0:
+            add_mask_to_plot(ax, result)
 
     except Exception as e:
         print(f"\033[91mError occurred while plotting height: {e}\033[00m")
         tag_id = None
         estimated_height = None
         
-        #graph styling and output
+    #graph styling and output
     plt.axis('off')
     props = dict(boxstyle='round', facecolor='white', alpha=0.75)
     if estimated_height is not None:
@@ -184,7 +175,7 @@ def plot_height(image, out_path):
 
     #ax.plot([], [], color=color, label=
      #       f"Estimated Height: {round(estimated_height*100,2)}cm \n")
-    ax.imshow(graph_rgb)
+    
     #ax.axis('on')
     #ax.legend(loc='upper center', bbox_to_anchor=(0.5, -0.05),ncol=1)
     

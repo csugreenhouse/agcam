@@ -5,9 +5,9 @@ import importlib
 
 plant_finder = importlib.import_module("plant_finders.legacyHSV_plant_finder")
 
-def select_black_pixels(image):
-    lower = np.array([0, 0, 0])
-    upper = np.array([60, 60, 60])
+def select_white_pixels(image):
+    lower = np.array([200, 200, 200])
+    upper = np.array([255, 255, 255])
 
     mask = cv2.inRange(image, lower, upper)
 
@@ -19,8 +19,10 @@ def get_contours_from_mask(mask):
     contours, hierarchy = cv2.findContours(t2,cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE)
     return contours
 
-def compare_two_masks(test_mask, answer_key_mask):
+def compare_two_masks(test_mask, key_mask):
     accuracy = 0.0
+
+    answer_key_mask = cv2.bitwise_not(key_mask)
 
     if cv2.countNonZero(test_mask) == 0 ^ cv2.countNonZero(answer_key_mask) == 0:
         print("One mask is empty")

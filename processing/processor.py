@@ -27,15 +27,11 @@ def process_and_make_copies_height_visuals(file_path,cam_name,bulk_delay_s, conn
     image_name = file_path.rsplit("/",1)[-1]
     out_path = processed_folder_path + image_name
 
-    img = cv2.imread(str(file_path))
-    if img is None:
-        raise FileNotFoundError(f"Src path missing {file_path}.")
-
     time.sleep(bulk_delay_s)
 
     #step 2: process & check for successful processing
 
-    response = gu.plot_height(img, out_path)
+    response = gu.plot_height(file_path, out_path)
 
     time.sleep(bulk_delay_s*2) #extra delay for graphing
 

@@ -28,7 +28,7 @@ def plant_finder_test_functionality(src_path):
 
     graph_util.plot_contour_and_mask(src_path, contours, mask)
 
-def test_select_black_pixels(src_path):
+def test_select_white_pixels(src_path):
     src_path = Path(src_path)
     
     img = cv2.imread(str(src_path))
@@ -36,10 +36,10 @@ def test_select_black_pixels(src_path):
     if img is None:
         raise FileNotFoundError(f"Missing {src_path}.")
 
-    mask = openCV_util.select_black_pixels(img)
+    mask = openCV_util.select_white_pixels(img)
     contours = openCV_util.get_contours_from_mask(mask)
 
-    graph_util.plot_contour_and_mask(src_path, contours, mask, True)
+    graph_util.plot_contour_and_mask(src_path, contours, mask, True, True)
     
 
 if __name__ == "__main__":
@@ -47,4 +47,4 @@ if __name__ == "__main__":
 
     plant_finder_test_functionality("tests/testimages/IMG_3398.jpg")
 
-    test_select_black_pixels("tests/testimages/plant_detect_accuracy_test/IMG_3397_key.jpg")
+    test_select_white_pixels("tests/testimages/plant_detect_accuracy_test/IMG_3397_key.jpg")

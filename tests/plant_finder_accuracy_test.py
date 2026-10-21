@@ -18,7 +18,7 @@ def test_accuracy(test_src_path, key_path):
     test_src_path = Path(test_src_path)
     key_path = Path(key_path)
 
-    answer_key_mask = openCV_util.select_black_pixels(cv2.imread(str(key_path)))
+    answer_key_mask = openCV_util.select_white_pixels(cv2.imread(str(key_path)))
     answer_key_contours = openCV_util.get_contours_from_mask(answer_key_mask)
     graph_util.plot_contour_and_mask(key_path, answer_key_contours, answer_key_mask) #optional visual sanity check
 

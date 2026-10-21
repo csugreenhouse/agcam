@@ -90,20 +90,8 @@ def make_reference_tag(raw_april_tag, current_only, scale=None, views=None):
     }
     return tag
 
-'''def filter_reference_tags_by_view_type(reference_tags, view_type):
-    filtered_tags = []
-    for tag in reference_tags:
-        filtered_views = [view for view in tag["views"] if view["view_type"] == view_type]
-        if filtered_views:
-            new_tag = tag.copy()
-            new_tag["views"] = filtered_views
-            filtered_tags.append(new_tag)
-    return filtered_tags'''
-
 def sort_corners(corners):
-    """
-    Sort corners in the order: top_left, top_right, bottom_right, bottom_left
-    """
+    # Sort corners in the order: top_left, top_right, bottom_right, bottom_left
     corners = np.array(corners)
     s = corners.sum(axis=1)
     diff = np.diff(corners, axis=1)

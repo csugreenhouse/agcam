@@ -12,14 +12,14 @@ import numpy as np
 import utils.reference_tag_util as reference_tag_util
 import utils.database_util as database_util
 import utils.line_util as line_util
-import utils.image_util as image_util
 import utils.reference_tag_util as reference_util
 import plant_finders.legacyHSV_plant_finder as plant_finder
 
 GREEN_BOUNDS = ((31, 50, 50), (75, 255, 200))
 
-def get_heighest_green_pixel(image, plant_bounds, minimum_area_pixels):
+def get_heighest_green_pixel(image_path, mask, plant_bounds, minimum_area_pixels):
     
+    image = cv2.imread(str(image_path))
     W,H = image.shape[1], image.shape[0]
     # ignore x outside of plant_bounds
     if plant_bounds is not None:
@@ -30,9 +30,7 @@ def get_heighest_green_pixel(image, plant_bounds, minimum_area_pixels):
         y_max = int(min(H-1, plant_bounds[3]*H))
         mask[y_min:y_max, x_min:x_max] = 255
         image = cv2.bitwise_and(image, image, mask=mask)
-    
-    mask = plant_finder.find_plants(image, anchor_area_fraction=0.75, anchor_max_proximity_px=25)
-    
+        
     heighest_pixel = None
     
     for pixel in np.argwhere(mask > 0):
@@ -48,7 +46,8 @@ def get_heighest_green_pixel(image, plant_bounds, minimum_area_pixels):
     
     return graph_info
 
-def height_request(image, reference_tags):
+def height_request(image_path, mask, reference_tags):
+    image = cv2.imread(str(image_path))
 
     #reference_tags = reference_util.filter_reference_tags_by_view_type(reference_tags, "height")
     if image is None:
@@ -56,7 +55,7 @@ def height_request(image, reference_tags):
     if len(reference_tags) == 0:
         raise ValueError("No reference tags were provided")
     
-    response = estimate_heights_reference_tags(image, reference_tags)
+    response = estimate_heights_reference_tags(image_path, mask, reference_tags)
     
     return response
 """
@@ -77,14 +76,15 @@ def height_request(image, reference_tags):
         }] WITH A LIST OF OTHER RESPONSES
 """
 
-def estimate_heights_reference_tags(image, reference_tags):
+def estimate_heights_reference_tags(image_path, mask, reference_tags):
     response = []
     for reference_tag in reference_tags:
-        reference_tag_response = estimate_heights_reference_tag(image, reference_tag)
+        mask = plant_finder.find_plants(image_path)
+        reference_tag_response = estimate_heights_reference_tag(image_path, mask, reference_tag)
         response+=reference_tag_response
     return response
 
-def estimate_heights_reference_tag(image, reference_tag):
+def estimate_heights_reference_tag(image_path, mask, reference_tag):
     response = []
 
     corners = reference_tag["corners"]
@@ -95,7 +95,7 @@ def estimate_heights_reference_tag(image, reference_tag):
     tag_scale_units_m = .07 #7cm 
     bias_units_m = 0.0
 
-    heighest_green_pixel_info = get_heighest_green_pixel(image, plant_bounds=None, minimum_area_pixels=50)
+    heighest_green_pixel_info = get_heighest_green_pixel(image_path, mask, plant_bounds=None, minimum_area_pixels=50)
     heighest_green_pixel = heighest_green_pixel_info["heighest_green_pixel"]
     green_blob_list = heighest_green_pixel_info["green_blob_list"]
     plant_bounds = heighest_green_pixel_info["plant_bounds"]
