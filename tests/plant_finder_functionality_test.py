@@ -39,7 +39,7 @@ def test_select_white_pixels(src_path):
     mask = openCV_util.select_white_pixels(img)
     contours = openCV_util.get_contours_from_mask(mask)
 
-    graph_util.plot_contour_and_mask(src_path, contours, mask, True, True)
+    graph_util.plot_contour_and_mask(src_path, contours, mask, True)
     
 
 if __name__ == "__main__":
