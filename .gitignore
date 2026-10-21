@@ -14,7 +14,11 @@ __pycache__/
 *_grown.jpg
 *_output.png
 *_discarded.png
-*.vscode/apriltag-0.0.16/build/
+
+build/*
+.DS_Store
+
  *.csv
+ apriltags/*
 
 secrets_util.json

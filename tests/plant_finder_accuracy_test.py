@@ -12,7 +12,7 @@ if str(ROOT) not in sys.path:
 graph_util = importlib.import_module("utils.graph_util")
 openCV_util = importlib.import_module("utils.openCV_util")
 
-plant_finder = importlib.import_module("plant_finders.legacyHSV_plant_finder")
+plant_finder = importlib.import_module("plant_finders.abby_plant_finder")
 
 def test_accuracy(test_src_path, key_path):
     test_src_path = Path(test_src_path)
