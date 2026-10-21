@@ -1,6 +1,6 @@
 import cv2
 import numpy as np
-from collections import deque
+from collections import deque #hamburger
 
 # --- Direct (strict) green bounds --------------------------------------------
 GREEN_LOWER = np.array([ 25,  35,  20], dtype="uint8")
