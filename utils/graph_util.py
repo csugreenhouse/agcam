@@ -115,8 +115,58 @@ def plot_contour_and_mask(src_path, contours, mask, show_mask = True):
         plt.close(fig)
         print(f"No blobs plotted, returning blank image at {out_path}. Exception: {e}")
 
-def add_mask_to_plot(ax, mask, cmap='bwr'):
-    ax.imshow(mask, cmap = cmap, alpha = 0.25)
+#vibecoded for sake of time, come back and make custom implementation
+def add_mask_to_plot(ax, mask, saturation_outside=0.0, contour_color="red", contour_width=1.5):
+    """
+    Desaturates an existing imshow plot on `ax` outside of the boolean `mask`
+    and draws a crisp contour outline around the mask boundary.
+    
+    Parameters:
+    - ax: Matplotlib Axes containing an existing image
+    - mask: 2D boolean array (True = keep color, False = desaturate)
+    - saturation_outside: 0.0 for complete grayscale, 1.0 for original color
+    - contour_color: Color of the mask outline (set to None to disable)
+    - contour_width: Line width of the mask outline
+    """
+    if not ax.images:
+        raise ValueError("No image found on `ax`. Plot your base image before calling this function.")
+    
+    # Grab the most recently plotted image on the axes
+    im = ax.images[-1]
+    
+    # Convert the image's current data and colormap into an RGBA array (H x W x 4)
+    rgba = im.to_rgba(im.get_array(), norm=True)
+    
+    # Ensure mask is a boolean array
+    mask = np.asarray(mask, dtype=bool)
+    outside = ~mask
+    
+    # Calculate perceptual grayscale luminance for pixels outside the mask
+    gray = (
+        0.299 * rgba[outside, 0] +
+        0.587 * rgba[outside, 1] +
+        0.114 * rgba[outside, 2]
+    )[:, np.newaxis]
+    
+    # Blend original RGB with grayscale based on saturation_outside
+    rgba[outside, :3] = (
+        saturation_outside * rgba[outside, :3] +
+        (1.0 - saturation_outside) * gray
+    )
+    
+    # Update the existing image in-place
+    im.set_data(rgba)
+    
+    # Draw a crisp contour outline along the 0.5 boundary of the boolean mask
+    if contour_color is not None:
+        ax.contour(
+            mask.astype(float),
+            levels=[0.5],
+            colors=contour_color,
+            linewidths=contour_width,
+            extent=im.get_extent(),
+            origin=im.origin
+        )
 
 #this method has a known error for parsing answer keys, however it is non fatal.
 # this method is not being used now in a way that breaks anything so it is not being fixed urgently
