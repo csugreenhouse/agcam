@@ -1,6 +1,7 @@
 import paramiko
 import json
 import time
+import subprocess
 
 import sys 
 
@@ -49,3 +50,24 @@ def run_pic_pipeline(cam_number):
     take_picture(ssh)
     send_pictures_to_server(ssh)
     close_ssh_connection(ssh)
+
+#method outline from https://stackoverflow.com/a/73315109 CC By SA 4.0
+def check_ping(cam_number):
+    import platform
+    with open("/mnt/db/agcam/utils/secrets_util.json") as f:
+        secrets = json.load(f)["ssh"]
+    try:
+        host = secrets["SSH_IP_BASE"]+str(cam_number)
+        param = '-n' if platform.system().lower()=='windows' else '-c'
+        command = ['ping', param, '1', host]
+
+        result = subprocess.run(command, stdout=subprocess.PIPE)
+        output = result.stdout.decode('utf8')
+        if "Request timed out." in output or "100% packet loss" in output:
+            print(f"Camera {cam_number} not connected")
+            return "NOT CONNECTED"
+        print(f"Camera {cam_number} connected")
+        return "CONNECTED"
+    except Exception as e:
+        print(f"Camera {cam_number} not connected")
+        return "NOT CONNECTED"
